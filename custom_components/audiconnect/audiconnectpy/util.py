@@ -270,13 +270,13 @@ class Identities(Enum):
         attr="preheater_state",
         evaluation=lambda x: x is not None,
         sensor_type="switch",
-        turn_mode="set_vehicle_pre_heater",
+        turn_mode="async_set_vehicle_pre_heater",
     )
     PREHEATER_ACTIVE = FieldType(
         attr="preheater_active",
         evaluation=lambda x: x != "off",
         sensor_type="switch",
-        turn_mode="set_vehicle_window_heating",
+        turn_mode="async_set_vehicle_window_heating",
     )
     PREHEATER_DURATION = FieldType(
         attr="preheater_duration",
@@ -385,7 +385,7 @@ class Identities(Enum):
         attr="climatisation_state",
         icon="mdi:air-conditioner",
         sensor_type="switch",
-        turn_mode="set_vehicle_climatisation",
+        turn_mode="async_set_vehicle_climatisation",
     )
     OUTDOOR_TEMPERATURE = FieldType(
         attr="outdoor_temperature",
