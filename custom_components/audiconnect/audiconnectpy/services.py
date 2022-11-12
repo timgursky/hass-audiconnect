@@ -433,7 +433,7 @@ class AudiService:
         )
 
     async def async_set_battery_charger(
-        self, vin: str, start: bool, timer: str
+        self, vin: str, start: bool, timer: bool
     ) -> None:
         """Set charger."""
         home_region = await self._async_get_home_region(vin.upper())
@@ -515,12 +515,8 @@ class AudiService:
         security_token = await self._async_get_security_token(
             vin, "rheating_v1/operations/P_QSACT"
         )
-
-        input_xml = (
-            '<performAction xmlns="http://audi.de/connect/rs"><quickstart><active>true</active></quickstart></performAction>'
-            if activate
-            else '<performAction xmlns="http://audi.de/connect/rs"><quickstop><active>false</active></quickstop></performAction>'
-        )
+        action = "true" if activate else "false"
+        input_xml = f'<performAction xmlns="http://audi.de/connect/rs"><quickstart><active>{action}</active></quickstart></performAction>'
         data = f'<?xml version="1.0" encoding= "UTF-8" ?>{input_xml}'
 
         headers = self._async_get_vehicle_action_header(

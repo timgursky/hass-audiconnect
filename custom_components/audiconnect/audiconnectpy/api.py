@@ -205,7 +205,7 @@ class AudiConnect:
             return False
 
     async def async_set_battery_charger(
-        self, vin: str, activate: bool, timer: str
+        self, vin: str, activate: bool, timer: bool = False
     ) -> bool:
         """Set charger."""
         if not await self.async_login():
