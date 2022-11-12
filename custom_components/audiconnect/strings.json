@@ -1,21 +1,24 @@
 {
-  "config": {
-    "title": "Audi Connect",
-    "step": {
-      "user": {
-        "title": "Please fill in the information of your Audi Connect account",
-        "data": {
-          "username": "Username",
-          "password": "Password",
-          "spin": "S-PIN",
-          "region": "Region",
-          "scan_interval": "Scan interval"
+    "config": {
+        "flow_title": "{name}",
+        "step": {
+            "user": {
+                "title": "Register your account",
+                "data": {
+                    "username": "[%key:common::config_flow::data::email]",
+                    "password": "[%key:common::config_flow::data::password]",
+                    "country": "country code",
+                    "pin": "Pin code"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+            "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+            "unknown": "[%key:common::config_flow::error::unknown%]"
+        },
+        "abort": {
+            "already_configured": "[%key:common::config_flow::abort::already_configured_service%]"
         }
-      }
-    },
-    "error": {
-      "invalid_credentials": "Login error, please check your username and password",
-      "invalid_username": "Invalid username"
     }
-  }
 }

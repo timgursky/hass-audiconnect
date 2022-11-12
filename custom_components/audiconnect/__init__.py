@@ -1,126 +1,104 @@
-"""Support for Audi Connect."""
-from datetime import timedelta
-import voluptuous as vol
+"""The Audi connect integration."""
+from __future__ import annotations
 
 import homeassistant.helpers.config_validation as cv
-from homeassistant.util.dt import utcnow
-from homeassistant import config_entries
-from homeassistant.const import (
-    CONF_NAME,
-    CONF_PASSWORD,
-    CONF_RESOURCES,
-    CONF_SCAN_INTERVAL,
-    CONF_USERNAME
-)
+import voluptuous as vol
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform
+from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.helpers import device_registry as dr
 
-from homeassistant.util.unit_system import (
-    _CONF_UNIT_SYSTEM_US_CUSTOMARY,
-    METRIC_SYSTEM,
-    US_CUSTOMARY_SYSTEM,
-    UnitSystem,
-)
+from .const import CONF_VIN, DOMAIN, CONF_ACTION
+from .coordinator import AudiDataUpdateCoordinator
 
-from .audi_account import AudiAccount
-from .audi_services import AudiService
+PLATFORMS: list[Platform] = [
+    Platform.SENSOR,
+    Platform.BINARY_SENSOR,
+    Platform.DEVICE_TRACKER,
+    Platform.SWITCH,
+    Platform.LOCK,
+]
 
-from .const import (
-    DOMAIN,
-    CONF_REGION,
-    CONF_MUTABLE,
-    DEFAULT_UPDATE_INTERVAL,
-    MIN_UPDATE_INTERVAL,
-    RESOURCES,
-    COMPONENTS,
-)
-
-CONFIG_SCHEMA = vol.Schema(
+SERVICE_REFRESH_VEHICLE_DATA = "refresh_data"
+SERVICE_REFRESH_VEHICLE_DATA_SCHEMA = vol.Schema(
     {
-        DOMAIN: vol.Schema(
-            {
-                vol.Required(CONF_USERNAME): cv.string,
-                vol.Required(CONF_PASSWORD): cv.string,
-                vol.Optional(
-                    CONF_SCAN_INTERVAL,
-                    default=timedelta(minutes=DEFAULT_UPDATE_INTERVAL),
-                ): vol.All(
-                    cv.time_period,
-                    vol.Clamp(min=timedelta(minutes=MIN_UPDATE_INTERVAL)),
-                ),
-                vol.Optional(CONF_NAME, default={}): cv.schema_with_slug_keys(
-                    cv.string
-                ),
-                vol.Optional(CONF_RESOURCES): vol.All(
-                    cv.ensure_list, [vol.In(RESOURCES)]
-                ),
-                vol.Optional(CONF_REGION): cv.string,
-                vol.Optional(CONF_MUTABLE, default=True): cv.boolean,
-            }
-        )
-    },
-    extra=vol.ALLOW_EXTRA,
+        vol.Required(CONF_VIN): cv.string,
+    }
+)
+
+SERVICE_EXECUTE_VEHICLE_ACTION = "execute_vehicle_action"
+SERVICE_EXECUTE_VEHICLE_ACTION_SCHEMA = vol.Schema(
+    {vol.Required(CONF_VIN): cv.string, vol.Required(CONF_ACTION): cv.string}
 )
 
 
-async def async_setup(hass, config):
-    if hass.config_entries.async_entries(DOMAIN):
-        return True
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up Audi connect from a config entry."""
+    hass.data.setdefault(DOMAIN, {})
 
-    if DOMAIN not in config:
-        return True
+    coordinator = AudiDataUpdateCoordinator(hass, entry)
+    await coordinator.async_config_entry_first_refresh()
 
-    names = config[DOMAIN].get(CONF_NAME)
-    if len(names) == 0:
-        return True
+    hass.data[DOMAIN][entry.entry_id] = coordinator
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    data = {}
-    data[CONF_USERNAME] = config[DOMAIN].get(CONF_USERNAME)
-    data[CONF_PASSWORD] = config[DOMAIN].get(CONF_PASSWORD)
-    data[CONF_SCAN_INTERVAL] = config[DOMAIN].get(CONF_SCAN_INTERVAL).seconds / 60
-    data[CONF_REGION] = config[DOMAIN].get(CONF_REGION)
+    async def async_refresh_vehicle_data(call: ServiceCall) -> None:
+        device_id = call.data.get(CONF_VIN).lower()
+        device = dr.async_get(hass).async_get(device_id)
+        vin = dict(device.identifiers).get(DOMAIN)
+        await coordinator.api.async_refresh_vehicle_data(vin)
+        await coordinator.async_request_refresh()
 
-    hass.async_create_task(
-        hass.config_entries.flow.async_init(
-            DOMAIN, context={"source": config_entries.SOURCE_IMPORT}, data=data
-        )
+    async def async_execute_vehicle_action(call: ServiceCall) -> None:
+        device_id = call.data.get(CONF_VIN).lower()
+        device = dr.async_get(hass).async_get(device_id)
+        vin = dict(device.identifiers).get(DOMAIN)
+        action = call.data.get(CONF_ACTION).lower()
+
+        if action == "lock":
+            await coordinator.api.async_set_lock(vin, True)
+        if action == "unlock":
+            await coordinator.api.async_set_lock(vin, False)
+        if action == "start_climatisation":
+            await coordinator.api.async_set_climatisation(vin, True)
+        if action == "stop_climatisation":
+            await coordinator.api.async_set_climatisation(vin, False)
+        if action == "start_charger":
+            await coordinator.api.async_set_battery_charger(vin, True, False)
+        if action == "start_timed_charger":
+            await coordinator.api.async_set_battery_charger(vin, True, True)
+        if action == "stop_charger":
+            await coordinator.api.async_set_battery_charger(vin, False, False)
+        if action == "start_preheater":
+            await coordinator.api.async_set_pre_heater(vin, True)
+        if action == "stop_preheater":
+            await coordinator.api.async_set_pre_heater(vin, False)
+        if action == "start_window_heating":
+            await coordinator.api.async_set_window_heating(vin, True)
+        if action == "stop_window_heating":
+            await coordinator.api.async_set_window_heating(vin, False)
+
+        await coordinator.async_request_refresh()
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_REFRESH_VEHICLE_DATA,
+        async_refresh_vehicle_data,
+        schema=SERVICE_REFRESH_VEHICLE_DATA_SCHEMA,
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_EXECUTE_VEHICLE_ACTION,
+        async_execute_vehicle_action,
+        schema=SERVICE_EXECUTE_VEHICLE_ACTION_SCHEMA,
     )
 
     return True
 
 
-async def async_setup_entry(hass, config_entry):
-    """Set up this integration using UI."""
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a config entry."""
+    if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
+        hass.data[DOMAIN].pop(entry.entry_id)
 
-    if DOMAIN not in hass.data:
-        hass.data[DOMAIN] = {}
-
-    """Set up the Audi Connect component."""
-    hass.data[DOMAIN]["devices"] = set()
-
-    account = config_entry.data.get(CONF_USERNAME)
-
-    unit_system = "metric"
-    if hass.config.units is US_CUSTOMARY_SYSTEM:
-        unit_system = "imperial"
-
-    if account not in hass.data[DOMAIN]:
-        data = hass.data[DOMAIN][account] = AudiAccount(hass, config_entry, unit_system=unit_system)
-        data.init_connection()
-    else:
-        data = hass.data[DOMAIN][account]
-
-    return await data.update(utcnow())
-
-
-async def async_unload_entry(hass, config_entry):
-    account = config_entry.data.get(CONF_USERNAME)
-
-    data = hass.data[DOMAIN][account]
-
-    for component in COMPONENTS:
-        await hass.config_entries.async_forward_entry_unload(
-            data.config_entry, component
-        )
-
-    del hass.data[DOMAIN][account]
-
-    return True
+    return unload_ok

@@ -1,43 +1,49 @@
 """Support for Audi Connect sensors."""
 import logging
 
-from homeassistant.components.binary_sensor import DEVICE_CLASSES, BinarySensorEntity
-from homeassistant.const import CONF_USERNAME
+from homeassistant.components.binary_sensor import BinarySensorEntity
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .audi_entity import AudiEntity
-from .const import DOMAIN, CONF_CARNAME
+from .const import DOMAIN
+from .entity import AudiEntity
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    """Old way."""
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
+    """Set up binary sensor."""
+    coordinator = hass.data[DOMAIN][entry.entry_id]
 
+    entities = []
+    for vin, vehicle in coordinator.data.items():
+        for name, data in vehicle.states.items():
+            if data.get("sensor_type") == "binary_sensor":
+                entities.append(AudiSensor(coordinator, vin, name))
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
-
-    sensors = []
-    account = config_entry.data.get(CONF_USERNAME)
-    audiData = hass.data[DOMAIN][account]
-
-    for config_vehicle in audiData.config_vehicles:
-        for binary_sensor in config_vehicle.binary_sensors:
-            sensors.append(AudiSensor(config_vehicle, binary_sensor))
-
-    async_add_entities(sensors)
+    async_add_entities(entities)
 
 
 class AudiSensor(AudiEntity, BinarySensorEntity):
     """Representation of an Audi sensor."""
 
-    @property
-    def is_on(self):
-        """Return True if the binary sensor is on."""
-        return self._instrument.is_on
+    def __init__(self, coordinator, vin, attr):
+        """Initialize."""
+        super().__init__(coordinator, vin)
+        entity = coordinator.data[vin].states[attr]
+        self._attribute = attr
+        self._attr_name = self.format_name(attr)
+        self._attr_unique_id = f"{vin}_{attr}"
+        self._attr_unit_of_measurement = entity.get("unit")
+        self._attr_icon = entity.get("icon")
+        self._attr_device_class = entity.get("device_class")
 
-    @property
-    def device_class(self):
-        """Return the class of this sensor, from DEVICE_CLASSES."""
-        if self._instrument.device_class in DEVICE_CLASSES:
-            return self._instrument.device_class
-        return None
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Get the state and update it."""
+        value = self.coordinator.data[self._unique_id].states[self._attribute]["value"]
+        self._attr_is_on = value
+        super()._handle_coordinator_update()

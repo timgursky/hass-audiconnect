@@ -1,10 +1,12 @@
 """Support for Audi Connect sensors."""
 import logging
 
-from homeassistant.const import CONF_USERNAME
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .audi_entity import AudiEntity
 from .const import DOMAIN
+from .entity import AudiEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -13,28 +15,38 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     """Old way."""
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
-    sensors = []
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
+    """Set up sensor."""
+    coordinator = hass.data[DOMAIN][entry.entry_id]
 
-    account = config_entry.data.get(CONF_USERNAME)
-    audiData = hass.data[DOMAIN][account]
+    entities = []
+    for vin, vehicle in coordinator.data.items():
+        for name, data in vehicle.states.items():
+            if data.get("sensor_type") == "sensor":
+                entities.append(AudiSensor(coordinator, vin, name))
 
-    for config_vehicle in audiData.config_vehicles:
-        for sensor in config_vehicle.sensors:
-            sensors.append(AudiSensor(config_vehicle, sensor))
-
-    async_add_entities(sensors, True)
+    async_add_entities(entities)
 
 
 class AudiSensor(AudiEntity):
     """Representation of a Audi sensor."""
 
-    @property
-    def state(self):
-        """Return the state."""
-        return self._instrument.state
+    def __init__(self, coordinator, vin, attr):
+        """Initialize."""
+        super().__init__(coordinator, vin)
+        entity = coordinator.data[vin].states[attr]
+        self._attribute = attr
+        self._attr_name = self.format_name(attr)
+        self._attr_unique_id = f"{vin}_{attr}"
+        self._attr_unit_of_measurement = entity.get("unit")
+        self._attr_icon = entity.get("icon")
+        self._attr_device_class = entity.get("device_class")
 
-    @property
-    def unit_of_measurement(self):
-        """Return the unit of measurement."""
-        return self._instrument.unit
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Get the state and update it."""
+        value = self.coordinator.data[self._unique_id].states[self._attribute]["value"]
+        self._attr_state = value
+        super()._handle_coordinator_update()
