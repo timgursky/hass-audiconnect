@@ -14,6 +14,7 @@ The `audiconnect` component provides an integration with the Audi Connect cloud 
 **Note:** Certain functions require special permissions from Audi, such as position update via GPS. 
 
 Credit for initial API discovery go to the guys at the ioBroker VW-Connect forum, who were able to figure out how the API and the PIN hashing works. Also some implementation credit to davidgiga1993 of the original [AudiAPI](https://github.com/davidgiga1993/AudiAPI) Python package, on which some of this code is loosely based.
+Thank you at arjenvrh who knew how to maintain and evolve the code for many years
 
 Installation
 ------------
