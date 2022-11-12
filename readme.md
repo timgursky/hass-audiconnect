@@ -7,11 +7,6 @@ Audi Connect Integration for Home Assistant
 
 [![hacs][hacsbadge]](hacs)
 
-Maintainers Wanted
-------------
-Due to time limitations this project is not actively maintained anymore. It will continue to work as long as Audi does not change the API again. 
-However, I'm open to someone else taking the lead. If you would like to become a maintainer, please contact me.
-
 Description
 ------------
 The `audiconnect` component provides an integration with the Audi Connect cloud service. It adds presence detection, sensors such as range, mileage, and fuel level, and provides car actions such as locking/unlocking and setting the pre-heater.
