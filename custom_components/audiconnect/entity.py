@@ -23,6 +23,7 @@ class AudiEntity(CoordinatorEntity[AudiDataUpdateCoordinator], Entity):
             "manufacturer": "Audi",
             "name": self._vehicle.title,
             "model": self._vehicle.model,
+            "configuration_url": "https://my.audi.com",
         }
         self._attr_extra_state_attributes = {
             "model": f"{self._vehicle.model}",
