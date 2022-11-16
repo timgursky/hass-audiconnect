@@ -2,6 +2,7 @@
 
 DOMAIN = "audiconnect"
 CONF_COUNTRY = "region"
+CONF_LEVEL = "level"
 CONF_VIN = "vin"
 CONF_ACTION = "action"
 COUNTRY_CODE = {

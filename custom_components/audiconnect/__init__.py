@@ -93,6 +93,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         schema=SERVICE_EXECUTE_VEHICLE_ACTION_SCHEMA,
     )
 
+    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
+
     return True
 
 
@@ -102,3 +104,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok
+
+
+async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry):
+    """Reload device tracker if change option."""
+    await hass.config_entries.async_reload(entry.entry_id)

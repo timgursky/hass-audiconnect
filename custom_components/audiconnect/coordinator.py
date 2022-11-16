@@ -5,6 +5,7 @@ import logging
 from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.util.unit_system import US_CUSTOMARY_SYSTEM
 from homeassistant.const import CONF_PASSWORD, CONF_PIN, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
@@ -26,12 +27,19 @@ class AudiDataUpdateCoordinator(DataUpdateCoordinator):
         super().__init__(
             hass, _LOGGER, name=DOMAIN, update_interval=timedelta(minutes=SCAN_INTERVAL)
         )
+
+        unit_system = (
+            "imperial" if hass.config.units is US_CUSTOMARY_SYSTEM else "metric"
+        )
+
         self.api = AudiConnect(
             async_create_clientsession(hass),
             entry.data[CONF_USERNAME],
             entry.data[CONF_PASSWORD],
             entry.data[CONF_COUNTRY],
             entry.data[CONF_PIN],
+            unit_system,
+            entry.options.get("level", 0),
         )
 
     async def _async_update_data(self) -> dict:
