@@ -31,7 +31,7 @@ from .models import (
     TripDataResponse,
     VehicleDataResponse,
 )
-from .util import get_attr, jload, to_byte_array
+from .util import get_attr, jload, to_byte_array, Globals
 
 MAX_RESPONSE_ATTEMPTS = 10
 REQUEST_STATUS_SLEEP = 10
@@ -49,7 +49,12 @@ _LOGGER = logging.getLogger(__name__)
 class AudiService:
     """Audi service."""
 
-    def __init__(self, api: Auth, country: str, spin: str) -> None:
+    def __init__(
+        self,
+        api: Auth,
+        country: str,
+        spin: str,
+    ) -> None:
         """Initialize."""
         self._api = api
         self._country = "DE" if country is None else country
@@ -139,7 +144,8 @@ class AudiService:
         data = await self._api.get(
             f"{home_region}/fs-car/bs/vsr/v1/{self._type}/{self._country}/vehicles/{vin.upper()}/status"
         )
-        _LOGGER.debug("RESPONSE %s", data)
+        if Globals.debug_level(self) >= 1:
+            _LOGGER.debug("RESPONSE: %s", data)
         return VehicleDataResponse(data, self._spin)
 
     async def async_get_charger(self, vin: str) -> ChargerDataResponse:
@@ -149,7 +155,8 @@ class AudiService:
         data = await self._api.get(
             f"{home_region}/fs-car/bs/batterycharge/v1/{self._type}/{self._country}/vehicles/{vin.upper()}/charger"
         )
-        _LOGGER.debug("RESPONSE %s", data)
+        if Globals.debug_level(self) >= 1:
+            _LOGGER.debug("RESPONSE: %s", data)
         return ChargerDataResponse(data)
 
     async def async_get_climater(self, vin: str) -> ClimaterDataResponse:
@@ -159,7 +166,8 @@ class AudiService:
         data = await self._api.get(
             f"{home_region}/fs-car/bs/climatisation/v1/{self._type}/{self._country}/vehicles/{vin.upper()}/climater"
         )
-        _LOGGER.debug("RESPONSE %s", data)
+        if Globals.debug_level(self) >= 1:
+            _LOGGER.debug("RESPONSE: %s", data)
         return ClimaterDataResponse(data)
 
     async def async_get_stored_position(self, vin: str) -> PositionDataResponse:
@@ -169,7 +177,8 @@ class AudiService:
         data = await self._api.get(
             f"{home_region}/fs-car/bs/cf/v1/{self._type}/{self._country}/vehicles/{vin.upper()}/position"
         )
-        _LOGGER.debug("RESPONSE %s", data)
+        if Globals.debug_level(self) >= 1:
+            _LOGGER.debug("RESPONSE: %s", data)
         return PositionDataResponse(data)
 
     async def async_get_operations_list(self, vin: str) -> dict[str, str]:
@@ -178,7 +187,8 @@ class AudiService:
         data = await self._api.get(
             f"https://mal-1a.prd.ece.vwg-connect.com/api/rolesrights/operationlist/v3/vehicles/{vin.upper()}"
         )
-        _LOGGER.debug("RESPONSE %s", data)
+        if Globals.debug_level(self) >= 1:
+            _LOGGER.debug("RESPONSE: %s", data)
         return data
 
     async def async_get_timer(self, vin: str) -> dict[str, str]:
@@ -188,7 +198,8 @@ class AudiService:
         data = await self._api.get(
             f"{home_region}/fs-car/bs/departuretimer/v1/{self._type}/{self._country}/vehicles/{vin.upper()}/timer"
         )
-        _LOGGER.debug("RESPONSE %s", data)
+        if Globals.debug_level(self) >= 1:
+            _LOGGER.debug("RESPONSE: %s", data)
         return data
 
     async def async_get_vehicles(self) -> dict[str, str]:
@@ -197,7 +208,8 @@ class AudiService:
         data = await self._api.get(
             f"https://msg.volkswagen.de/fs-car/usermanagement/users/v1/{self._type}/{self._country}/vehicles"
         )
-        _LOGGER.debug("RESPONSE %s", data)
+        if Globals.debug_level(self) >= 1:
+            _LOGGER.debug("RESPONSE: %s", data)
         return data
 
     async def async_get_vehicle_information(self):
@@ -227,7 +239,8 @@ class AudiService:
         vins = jload(rep_rsptxt)
         if "data" not in vins:
             raise InvalidFormatError("Invalid json in vehicle information")
-        _LOGGER.debug("RESPONSE %s", vins["data"])
+        if Globals.debug_level(self) >= 1:
+            _LOGGER.debug("RESPONSE: %s", vins["data"])
         return vins["data"]
 
     async def async_get_vehicle_data(self, vin: str) -> dict[str, str]:
@@ -237,7 +250,7 @@ class AudiService:
         data = await self._api.get(
             f"{home_region}/fs-car/vehicleMgmt/vehicledata/v2/{self._type}/{self._country}/vehicles/{vin.upper()}/"
         )
-        _LOGGER.debug("RESPONSE %s", data)
+        _LOGGER.debug("RESPONSE: %s", data)
         return data
 
     async def async_get_tripdata(
@@ -287,8 +300,9 @@ class AudiService:
                 td_current["tripID"] = trip["tripID"]
                 td_current["startMileage"] = trip["startMileage"]
 
-        _LOGGER.debug("RESPONSE %s", td_current)
-        _LOGGER.debug("RESPONSE %s", td_reset_trip)
+        if Globals.debug_level(self) >= 1:
+            _LOGGER.debug("RESPONSE: %s", td_current)
+            _LOGGER.debug("RESPONSE: %s", td_reset_trip)
 
         return TripDataResponse(td_current), TripDataResponse(td_reset_trip)
 
@@ -764,7 +778,6 @@ class AudiService:
             params=idk_data,
             rsp_wtxt=True,
         )
-        _LOGGER.debug("GET %s", self.authorization_endpoint)
 
         # form_data with email
         submit_data = self.get_hidden_html_input_form_data(idk_rsptxt, {"email": user})
@@ -878,7 +891,8 @@ class AudiService:
         )
         self._bearer_token_json = jload(bearer_token_rsptxt)
 
-        _LOGGER.debug("BEARER Token: %s", self._bearer_token_json)
+        if Globals.debug_level(self) >= 2:
+            _LOGGER.debug("BEARER Token: %s", self._bearer_token_json)
 
         # AZS token
         headers = {
@@ -906,7 +920,8 @@ class AudiService:
         azs_token_json = jload(azs_token_rsptxt)
         self.audi_token = azs_token_json
 
-        _LOGGER.debug("AZS Token: %s", self.audi_token)
+        if Globals.debug_level(self) >= 2:
+            _LOGGER.debug("AZS Token: %s", self.audi_token)
 
         # mbboauth client register
         headers = {
@@ -992,7 +1007,8 @@ class AudiService:
         # this code is the old "vwToken"
         self.vw_token = jload(mbboauth_refresh_rsptxt)
 
-        _LOGGER.debug("MBB Token: %s", self.vw_token)
+        if Globals.debug_level(self) >= 2:
+            _LOGGER.debug("MBB Token: %s", self.vw_token)
 
     def _generate_security_pin_hash(self, challenge) -> str:
         """Generate security pin hash."""

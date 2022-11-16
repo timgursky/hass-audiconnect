@@ -9,6 +9,7 @@ from .auth import Auth
 from .models import Vehicle
 from .services import AudiService
 from .exceptions import HttpRequestError, RequestError
+from .util import Globals
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -27,13 +28,22 @@ class AudiConnect:
     """Representation of an Audi Connect Account."""
 
     def __init__(
-        self, session, username: str, password: str, country: str, spin: str
+        self,
+        session,
+        username: str,
+        password: str,
+        country: str,
+        spin: str | None = None,
+        unit_system: str = "metric",
+        dbg_level: int = 0,
     ) -> None:
         """Initiliaze."""
+        Globals(unit_system, dbg_level)
         self._api = Auth(session)
         self._audi_service = AudiService(self._api, country, spin)
         self._username = username
         self._password = password
+        self._unit_system = unit_system
         self._logintime = time.time()
         self._connect_retries = 3
         self._connect_delay = 10
@@ -86,7 +96,9 @@ class AudiConnect:
                     await self._audi_service.async_get_vehicle_information()
                 )
                 for response in vehicles_response.get("userVehicles"):
-                    self._audi_vehicles.append(Vehicle(response, self._audi_service))
+                    self._audi_vehicles.append(
+                        Vehicle(response, self._audi_service)
+                    )
 
                 self.vehicles = {}
                 for vehicle in self._audi_vehicles:

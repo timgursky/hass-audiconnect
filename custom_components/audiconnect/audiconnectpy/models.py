@@ -531,7 +531,6 @@ class Vehicle:
     def __init__(self, data, audi_service) -> None:
         """Initialize."""
         self._audi_service = audi_service
-
         self.vin = data.get("vin")
         self.csid = data.get("csid")
         if media := get_attr(data, "vehicle.media"):
@@ -605,7 +604,6 @@ class Vehicle:
                     self.states.update(result.attributes)
             except RequestError as error:
                 if error.status in (401, 403, 502):
-                    _LOGGER.debug("support_status set to False: %s", error.status)
                     self.support_status = False
                 else:
                     _LOGGER.error(
@@ -631,7 +629,6 @@ class Vehicle:
                     self.states.update(result.attributes)
             except RequestError as error:
                 if error.status in (401, 403, 502):
-                    _LOGGER.debug("support_position set to False: %s", error.status)
                     self.support_position = False
                 # If error is 204 is returned, the position is currently not available
                 elif error.status != 204:
@@ -658,7 +655,6 @@ class Vehicle:
                     self.states.update(result.attributes)
             except RequestError as error:
                 if error.status in (401, 403, 502):
-                    _LOGGER.debug("support_climater set to False: %s", error.status)
                     self.support_climater = False
                 else:
                     _LOGGER.error(
@@ -684,7 +680,6 @@ class Vehicle:
                     self.states.update(result.attributes)
             except RequestError as error:
                 if error.status in (401, 403, 502):
-                    _LOGGER.debug("support_preheater set to False: %s", error.status)
                     self.support_preheater = False
                 else:
                     _LOGGER.error(
@@ -710,7 +705,6 @@ class Vehicle:
                     self.states.update(result.attributes)
             except RequestError as error:
                 if error.status in (401, 403, 502):
-                    _LOGGER.debug("support_charger set to False: %s", error.status)
                     self.support_charger = False
                 else:
                     _LOGGER.error(
@@ -753,7 +747,6 @@ class Vehicle:
                     )
             except RequestError as error:
                 if error.status in (400, 401, 403, 502):
-                    _LOGGER.debug("support_trip set to False: %s", error.status)
                     setattr(self, f"support_{kind}", False)
                 else:
                     _LOGGER.error(

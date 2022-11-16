@@ -2,6 +2,6 @@
 
 """audiconnectpy package."""
 from .api import AudiConnect
-from .exceptions import AudiException
+from .exceptions import AudiException, AuthorizationError
 
-__all__ = ["AudiConnect", "AudiException"]
+__all__ = ["AudiConnect", "AudiException", "AuthorizationError"]

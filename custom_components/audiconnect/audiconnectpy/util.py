@@ -440,6 +440,21 @@ class Identities(Enum):
     LONGTERM_CURRENT = FieldType(attr="longterm_current", sensor_type="sensor")
 
 
+class Globals:
+    """Set Global metric."""
+
+    def __init__(self, unit: str = "metric", level: int = 0):
+        """Initialize."""
+        global UNIT_SYSTEM, DEBUG_LEVEL
+        UNIT_SYSTEM = f"{unit}"
+        DEBUG_LEVEL = int(level)
+
+    @staticmethod
+    def debug_level(self):
+        """Return debug level."""
+        return DEBUG_LEVEL
+
+
 def get_attr(
     dictionary: dict[Any, dict[str, Any]], keys, default: str | None = None
 ) -> Any:
@@ -479,6 +494,9 @@ def set_attr(
         if field_type.evaluation and value:
             try:
                 value = field_type.evaluation(value)
+                if UNIT_SYSTEM == "imperial" and field_type.unit == "km":
+                    unit = "mi"
+                    value = round(value * 0.621371, 2)
             except Exception as error:  # pylint: disable=broad-except
                 _LOGGER.error(error)
 

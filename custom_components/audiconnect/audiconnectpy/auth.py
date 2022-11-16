@@ -9,6 +9,7 @@ from datetime import datetime
 import async_timeout
 from aiohttp.hdrs import METH_GET, METH_POST, METH_PUT
 from .exceptions import TimeoutExceededError, HttpRequestError, RequestError
+from .util import Globals
 
 TIMEOUT = 120
 
@@ -59,15 +60,15 @@ class Auth:
         """Request url with method."""
         try:
             with async_timeout.timeout(TIMEOUT):
-                _LOGGER.debug("----------------------------------------------")
-                # _LOGGER.debug("HEADER: %s", headers)
-                if method == "POST":
-                    _LOGGER.debug("POST DATA:%s", data)
+                if Globals.debug_level(self) >= 2:
+                    _LOGGER.debug("HEADER: %s", headers)
+                    if method == "POST":
+                        _LOGGER.debug("POST DATA:%s", data)
                 _LOGGER.debug("METHOD:%s URL:%s", method, url)
-                _LOGGER.debug("----------------------------------------------")
                 async with self._session.request(
                     method, url, headers=headers, data=data, **kwargs
                 ) as response:
+                    _LOGGER.debug("RESPONSE: %s", response.status)
                     if raw_reply:
                         return response
                     elif rsp_txt:
