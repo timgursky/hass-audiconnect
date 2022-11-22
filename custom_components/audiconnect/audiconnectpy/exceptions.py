@@ -1,6 +1,6 @@
 """Exceptions for Audi connect."""
 import logging
-
+from aiohttp import RequestInfo
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -12,7 +12,9 @@ class AudiException(Exception):
 class RequestError(AudiException):
     """Not open url."""
 
-    def __init__(self, request_info, history=None, status=None, message=None):
+    def __init__(
+        self, request_info: RequestInfo, history=None, status=None, message=None
+    ) -> None:
         """Initialize."""
         self.request_info = request_info
         self.history = history

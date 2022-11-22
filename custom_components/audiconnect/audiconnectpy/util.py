@@ -1,12 +1,13 @@
 """Helper functions."""
 from __future__ import annotations
 
-import json
-import logging
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
 from functools import reduce
+import json
+import logging
 from typing import Any
 
 from .exceptions import InvalidFormatError
@@ -450,13 +451,13 @@ class Globals:
         DEBUG_LEVEL = int(level)
 
     @staticmethod
-    def debug_level(self):
+    def debug_level() -> int:
         """Return debug level."""
-        return DEBUG_LEVEL
+        return int(DEBUG_LEVEL)
 
 
 def get_attr(
-    dictionary: dict[Any, dict[str, Any]], keys, default: str | None = None
+    dictionary: dict[Any, dict[str, Any]], keys: str, default: str | None = None
 ) -> Any:
     """Return attribute value."""
     return reduce(
@@ -515,9 +516,24 @@ def set_attr(
     return attribute
 
 
-def jload(json_loads: str | bytes) -> dict[Any, Any]:
+def jload(json_loads: str | bytes) -> Any:
     """Load json with error manage."""
     try:
         return json.loads(json_loads)
     except json.decoder.JSONDecodeError as error:
         raise InvalidFormatError("Invalid json") from error
+
+
+def obj_parser(obj: dict[str, Any]) -> dict[str, Any]:
+    """Parse datetime."""
+    for key, val in obj.items():
+        try:
+            obj[key] = datetime.strptime(val, "%Y-%m-%dT%H:%M:%S%z")
+        except (TypeError, ValueError):
+            pass
+    return obj
+
+
+def json_loads(jsload: str | bytes) -> Any:
+    """Json load."""
+    return json.loads(jsload, object_hook=obj_parser)

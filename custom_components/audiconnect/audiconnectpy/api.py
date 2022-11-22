@@ -1,16 +1,15 @@
 """Audi connect."""
 from __future__ import annotations
 
-import asyncio
 import logging
-import time
+
+from aiohttp import ClientSession
 
 from .auth import Auth
+from .exceptions import HttpRequestError, RequestError
 from .models import Vehicle
 from .services import AudiService
-from .exceptions import HttpRequestError, RequestError
 from .util import Globals
-
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,61 +28,41 @@ class AudiConnect:
 
     def __init__(
         self,
-        session,
+        session: ClientSession,
         username: str,
         password: str,
         country: str,
-        spin: str | None = None,
+        spin: str,
         unit_system: str = "metric",
         dbg_level: int = 0,
     ) -> None:
         """Initiliaze."""
         Globals(unit_system, dbg_level)
-        self._api = Auth(session)
-        self._audi_service = AudiService(self._api, country, spin)
+        self._auth = Auth(session)
+        self._audi_service = AudiService(self._auth, country, spin)
         self._username = username
         self._password = password
+        self._country = country
         self._unit_system = unit_system
-        self._logintime = time.time()
         self._connect_retries = 3
         self._connect_delay = 10
         self._audi_vehicles: list[Vehicle] = []
         self._excluded_refresh: set[str] = set()
-        self.is_connected = False
+        self.is_connected: bool = False
         self.vehicles: dict[str, Vehicle] = {}
 
-    async def async_login(self, ntries=3) -> bool:
+    async def async_login(self) -> bool:
         """Login and retreive tokens."""
         if not self.is_connected:
-            try:
-                await self._audi_service.async_login_request(
-                    self._username, self._password
-                )
-            except HttpRequestError as error:  # pylint: disable=broad-except
-                if ntries > 1:
-                    _LOGGER.error(
-                        "Login to Audi service failed, trying again in %s seconds",
-                        self._connect_delay,
-                    )
-                    await asyncio.sleep(self._connect_delay)
-                    await self.async_login(ntries - 1)
-                else:
-                    _LOGGER.error("Login to Audi service failed: %s ", str(error))
-                    self.is_connected = False
-            else:
-                self.is_connected = True
-                self._logintime = time.time()
+            self.is_connected = await self._auth.async_connect(
+                self._username, self._password, self._country
+            )
         return self.is_connected
 
     async def async_update(self, vinlist: list[str] | None = None) -> bool:
         """Update data."""
         if not await self.async_login():
             return False
-
-        elapsed_sec = time.time() - self._logintime
-        if await self._audi_service.async_refresh_token_if_necessary(elapsed_sec):
-            # Store current timestamp when refresh was performed and successful
-            self._logintime = time.time()
 
         # Update the state of all vehicles.
         try:
@@ -96,9 +75,7 @@ class AudiConnect:
                     await self._audi_service.async_get_vehicle_information()
                 )
                 for response in vehicles_response.get("userVehicles"):
-                    self._audi_vehicles.append(
-                        Vehicle(response, self._audi_service)
-                    )
+                    self._audi_vehicles.append(Vehicle(response, self._audi_service))
 
                 self.vehicles = {}
                 for vehicle in self._audi_vehicles:
@@ -113,7 +90,7 @@ class AudiConnect:
             return False
 
     async def async_add_or_update_vehicle(
-        self, vehicle, vinlist: list[str] | None
+        self, vehicle: Vehicle, vinlist: list[str] | None
     ) -> None:
         """Add or Update vehicle."""
         if vehicle.vin is not None:
@@ -150,12 +127,20 @@ class AudiConnect:
             if error.status in (403, 502):
                 _LOGGER.debug("refresh vehicle not supported: %s", error.status)
                 self._excluded_refresh.add(vin)
+            elif error.status == 401:
+                _LOGGER.debug("Request unauthorized. Update and retry refresh")
+                try:
+                    self.is_connected = False
+                    await self.async_login()
+                    await self._audi_service.async_refresh_vehicle_data(vin)
+                except RequestError as err:
+                    _LOGGER.error(
+                        "Unable to refresh vehicle data of %s, despite trying again (%s)",
+                        vin,
+                        err,
+                    )
             else:
-                _LOGGER.error(
-                    "Unable to refresh vehicle data of %s: %s",
-                    vin,
-                    str(error).rstrip("\n"),
-                )
+                _LOGGER.error("Unable to refresh vehicle data of %s: %s", vin, error)
         except HttpRequestError as error:  # pylint: disable=broad-except
             _LOGGER.error(
                 "Unable to refresh vehicle data of %s: %s", vin, str(error).rstrip("\n")
@@ -224,17 +209,17 @@ class AudiConnect:
             return False
 
         try:
-            action = "start" if activate else "stop"
-            timer = " timed" if timer else ""
+            action: str = "start" if activate else "stop"
+            timed: str = " timed" if timer else ""
             _LOGGER.debug(
                 "Sending command to %s%s charger to vehicle %s",
                 action,
                 vin,
-                timer,
+                timed,
             )
             await self._audi_service.async_set_battery_charger(vin, activate, timer)
             action = "started" if activate else "stopped"
-            _LOGGER.debug("Successfully %s%s charger of vehicle %s", action, vin, timer)
+            _LOGGER.debug("Successfully %s%s charger of vehicle %s", action, vin, timed)
             return True
         except RequestError as error:  # pylint: disable=broad-except
             action = "start" if activate else "stop"

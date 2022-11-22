@@ -4,10 +4,14 @@ from __future__ import annotations
 import asyncio
 import logging
 from asyncio import TimeoutError  # pylint: disable=redefined-builtin
-from typing import Any
+from typing import TYPE_CHECKING, Any, Callable
 
-from .exceptions import TimeoutExceededError, RequestError, HttpRequestError
-from .util import set_attr, get_attr
+from .exceptions import HttpRequestError, RequestError, TimeoutExceededError
+from .util import get_attr, set_attr
+
+if TYPE_CHECKING:
+    from .services import AudiService
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -293,7 +297,7 @@ class VehicleDataResponse:
 class ChargerDataResponse:
     """Charger class."""
 
-    def __init__(self, data) -> None:
+    def __init__(self, data: dict[Any, dict[str, Any]]) -> None:
         """Initialize."""
         self._data = data
 
@@ -402,7 +406,7 @@ class ChargerDataResponse:
 class ClimaterDataResponse:
     """Climater class."""
 
-    def __init__(self, data) -> None:
+    def __init__(self, data: dict[Any, dict[str, Any]]) -> None:
         """Initialize."""
         self._data = data
 
@@ -443,7 +447,7 @@ class ClimaterDataResponse:
 class PositionDataResponse:
     """Position class."""
 
-    def __init__(self, data) -> None:
+    def __init__(self, data: dict[Any, dict[str, Any]]) -> None:
         """Initialize."""
         self._data = data
 
@@ -528,30 +532,28 @@ class TripDataResponse:
 class Vehicle:
     """Vehicle class."""
 
-    def __init__(self, data, audi_service) -> None:
+    def __init__(self, data: Any, audi_service: AudiService) -> None:
         """Initialize."""
         self._audi_service = audi_service
         self.vin = data.get("vin")
         self.csid = data.get("csid")
-        if media := get_attr(data, "vehicle.media"):
-            self.model = media.get("longName")
-        if core := get_attr(data, "vehicle.core"):
-            self.model_year = core.get("modelYear")
+        self.model = get_attr(data, "vehicle.media.longName", "")
+        self.model_year = get_attr(data, "vehicle.core.modelYear")
         if (nickname := data.get("nickname")) is not None and len(nickname) > 0:
-            self.title = data.get("nickname")
+            self.title = nickname
         else:
-            self.title = media.get("shortName")
+            self.title = get_attr(data, "vehicle.media.shortName", self.vin)
 
-        self.support_status = None
-        self.support_position = None
-        self.support_climater = None
-        self.support_preheater = None
-        self.support_charger = None
-        self.support_shortTerm = None
-        self.support_longTerm = None
+        self.support_status: bool | None = None
+        self.support_position: bool | None = None
+        self.support_climater: bool | None = None
+        self.support_preheater: bool | None = None
+        self.support_charger: bool | None = None
+        self.support_shortTerm: bool | None = None
+        self.support_longTerm: bool | None = None
         self.states: dict[Any, dict[str, Any]] = {}
 
-    async def call_update(self, func, ntries: int) -> None:
+    async def call_update(self, func: Callable, ntries: int) -> None:
         """Call update."""
         try:
             await func()
@@ -590,7 +592,7 @@ class Vehicle:
             return False
         return True
 
-    async def async_update_status(self):
+    async def async_update_status(self) -> None:
         """Update vehicle status."""
         if self.support_status is not False:
             try:
@@ -620,7 +622,7 @@ class Vehicle:
             else:
                 self.support_status = result.vehicledata_supported
 
-    async def async_update_position(self):
+    async def async_update_position(self) -> None:
         """Update vehicle position."""
         if self.support_position is not False:
             try:
@@ -646,7 +648,7 @@ class Vehicle:
             else:
                 self.support_position = result.position_supported
 
-    async def async_update_climater(self):
+    async def async_update_climater(self) -> None:
         """Update vehicle climater."""
         if self.support_climater is not False:
             try:
@@ -671,7 +673,7 @@ class Vehicle:
             else:
                 self.support_climater = result.charger_supported
 
-    async def async_update_preheater(self):
+    async def async_update_preheater(self) -> None:
         """Update vehicle preheater."""
         if self.support_preheater is not False:
             try:
@@ -696,7 +698,7 @@ class Vehicle:
             else:
                 self.support_preheater = result.preheater_supported
 
-    async def async_update_charger(self):
+    async def async_update_charger(self) -> None:
         """Update vehicle charger."""
         if self.support_charger is not False:
             try:
@@ -721,15 +723,15 @@ class Vehicle:
             else:
                 self.support_charger = result.charger_supported
 
-    async def async_update_trip_longterm(self):
+    async def async_update_trip_longterm(self) -> None:
         """Update vehicle longterm trip."""
         await self.async_update_tripdata("longTerm")
 
-    async def async_update_trip_shortterm(self):
+    async def async_update_trip_shortterm(self) -> None:
         """Update vehicle shorterm trip."""
         await self.async_update_tripdata("shortTerm")
 
-    async def async_update_tripdata(self, kind: str):
+    async def async_update_tripdata(self, kind: str) -> None:
         """Update vehicle trip."""
         if getattr(self, f"support_{kind}") is not False:
             try:
