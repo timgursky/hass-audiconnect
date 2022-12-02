@@ -135,10 +135,10 @@ class VehicleDataResponse:
         "0x030106000F": "TYRE_PRESSURE_SPARE_TYRE_DIFFERENCE",
     }
 
-    def __init__(self, data: dict[str, str], spin: str | None = None) -> None:
+    def __init__(self, data: dict[str, str], has_pin: bool = False) -> None:
         """Initialize."""
         self._data: dict[str, Any] = data
-        self._spin = spin
+        self.has_pin = has_pin
         self.measure_time = None
         self.send_time = None
         self.send_time_utc = None
@@ -264,8 +264,7 @@ class VehicleDataResponse:
         _metadatas.update(
             set_attr(
                 "LOCK_SUPPORTED",
-                _metadatas.get("doors_trunk_status") is not None
-                and self._spin is not None,
+                _metadatas.get("doors_trunk_status") is not None and self.has_pin,
             )
         )
 

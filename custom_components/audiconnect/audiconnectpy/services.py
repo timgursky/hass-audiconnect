@@ -77,7 +77,7 @@ class AudiService:
         )
         if Globals.debug_level() >= 1:
             _LOGGER.debug("RESPONSE: %s", data)
-        return VehicleDataResponse(data, self._spin)
+        return VehicleDataResponse(data, self._spin is not None)
 
     async def async_get_charger(self, vin: str) -> ChargerDataResponse:
         """Get charger data."""
@@ -435,7 +435,7 @@ class AudiService:
 
     def _generate_security_pin_hash(self, challenge: str) -> str:
         """Generate security pin hash."""
-        pin = to_byte_array(self._spin)
+        pin = to_byte_array(str(self._spin))
         byte_challenge = to_byte_array(challenge)
         b_pin = bytes(pin + byte_challenge)
         return sha512(b_pin).hexdigest().upper()

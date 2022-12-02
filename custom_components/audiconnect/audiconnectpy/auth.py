@@ -485,6 +485,7 @@ class Auth:
         headers = {
             "Accept": "application/json, application/vnd.vwg.mbb.ChargerAction_v1_0_0+xml,application/vnd.volkswagenag.com-error-v1+xml,application/vnd.vwg.mbb.genericError_v1_0_2+xml, application/vnd.vwg.mbb.RemoteStandheizung_v2_0_0+xml, application/vnd.vwg.mbb.genericError_v1_0_2+xml,application/vnd.vwg.mbb.RemoteLockUnlock_v1_0_0+xml,*/*",
             "Accept-charset": "UTF-8",
+            "Authorization": f"Bearer {self._mbb_token['access_token']}",
             "Content-Type": content_type,
             "Host": "msg.volkswagen.de",
             "User-Agent": "okhttp/3.7.0",
@@ -719,13 +720,13 @@ class Auth:
             "appVersion": HDR_XAPP_VERSION,
             "appId": "de.myaudi.mobile.assistant",
         }
-        mbboauth_client_reg_rsp, mbboauth_client_reg_rsptxt = await self.request(
+        mbboauth_client_reg_rsptxt = await self.request(
             "POST",
             self._mbb_baseurl + "/mobile/register/v1",
             json.dumps(mbboauth_reg_data),
             headers=headers,
             allow_redirects=False,
-            rsp_wtxt=True,
+            rsp_txt=True,
         )
         mbboauth_client_reg_json = jload(mbboauth_client_reg_rsptxt)
         return mbboauth_client_reg_json["client_id"]
