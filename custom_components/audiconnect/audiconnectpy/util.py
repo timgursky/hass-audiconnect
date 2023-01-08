@@ -33,6 +33,7 @@ class Identities(Enum):
     """IDS Audi."""
 
     # Fields
+    # pylint: disable=unnecessary-lambda
     UTC_TIME_AND_KILOMETER_STATUS = FieldType(
         attr="mileage",
         sensor_type="sensor",
@@ -439,21 +440,14 @@ class Identities(Enum):
     SHORTTERM_CURRENT = FieldType(attr="shortterm_current", sensor_type="sensor")
     LONGTERM_RESET = FieldType(attr="longterm_reset", sensor_type="sensor")
     LONGTERM_CURRENT = FieldType(attr="longterm_current", sensor_type="sensor")
+    # pylint: enable=unnecessary-lambda
 
 
 class Globals:
-    """Set Global metric."""
-
-    def __init__(self, unit: str = "metric", level: int = 0):
-        """Initialize."""
-        global UNIT_SYSTEM, DEBUG_LEVEL
-        UNIT_SYSTEM = f"{unit}"
-        DEBUG_LEVEL = int(level)
-
-    @staticmethod
-    def debug_level() -> int:
-        """Return debug level."""
-        return int(DEBUG_LEVEL)
+    def __init__(self, unit: str) -> None:
+        """Initiliaze."""
+        global UNIT_SYSTEM  # pylint: disable=global-variable-undefined
+        UNIT_SYSTEM = f"{unit}"  # type: ignore
 
 
 def get_attr(
@@ -461,9 +455,7 @@ def get_attr(
 ) -> Any:
     """Return attribute value."""
     return reduce(
-        lambda d, key: d.get(key, default)
-        if isinstance(d, dict)
-        else default,  # mypy:ingore
+        lambda d, key: d.get(key, default) if isinstance(d, dict) else default,  # type: ignore
         keys.split("."),
         dictionary,
     )
@@ -495,7 +487,7 @@ def set_attr(
         if field_type.evaluation and value:
             try:
                 value = field_type.evaluation(value)
-                if UNIT_SYSTEM == "imperial" and field_type.unit == "km":
+                if UNIT_SYSTEM == "imperial" and field_type.unit == "km":  # type: ignore
                     unit = "mi"
                     value = round(value * 0.621371, 2)
             except Exception as error:  # pylint: disable=broad-except
@@ -516,10 +508,10 @@ def set_attr(
     return attribute
 
 
-def jload(json_loads: str | bytes) -> Any:
+def jload(json_data: str | bytes) -> Any:
     """Load json with error manage."""
     try:
-        return json.loads(json_loads)
+        return json.loads(json_data)
     except json.decoder.JSONDecodeError as error:
         raise InvalidFormatError("Invalid json") from error
 

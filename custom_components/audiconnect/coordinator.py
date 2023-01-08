@@ -39,7 +39,6 @@ class AudiDataUpdateCoordinator(DataUpdateCoordinator):
             entry.data[CONF_COUNTRY],
             entry.data[CONF_PIN],
             unit_system,
-            entry.options.get("level", 0),
         )
 
     async def _async_update_data(self) -> dict:
