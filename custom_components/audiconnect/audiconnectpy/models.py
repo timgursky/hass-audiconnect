@@ -410,7 +410,7 @@ class ClimaterDataResponse:
         self._data = data
 
     @property
-    def charger_supported(self) -> bool:
+    def climater_supported(self) -> bool:
         """Supported status."""
         return (
             get_attr(self._data, "climatisation_state") is not None
