@@ -369,7 +369,7 @@ class Identities(Enum):
         device_class="power_factor",
     )
     PLUG_STATE = FieldType(
-        attr="secondary_engine_type",
+        attr="plug_state",
         sensor_type="sensor",
         icon="mdi:power-plug",
     )
