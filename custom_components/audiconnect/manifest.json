@@ -12,6 +12,6 @@
   "after_dependencies": ["lock"],
   "codeowners": ["@cyr-ius"],
   "iot_class": "cloud_polling",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "loggers": ["audiconnectpy"]
 }
