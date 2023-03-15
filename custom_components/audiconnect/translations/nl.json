@@ -4,8 +4,6 @@
             "invalid_credentials": "Ongeldige gebruikersgegevens",
             "user_already_configured": "Account is al geconfigureerd"
         },
-        "create_entry": {
-        },
         "error": {
             "invalid_credentials": "Ongeldige gebruikersgegevens",
             "invalid_username": "Ongeldige gebruikersnaam",
@@ -18,8 +16,7 @@
                     "password": "Wachtwoord",
                     "username": "Gebruikersnaam",
                     "spin": "S-PIN",
-                    "region": "Regio",
-                    "scan_interval": "Update interval"
+                    "region": "Regio"
                 },
                 "title": "Audi Connect accountgegevens"
             }

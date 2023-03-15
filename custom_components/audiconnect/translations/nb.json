@@ -4,8 +4,6 @@
             "invalid_credentials": "Ugyldige innloggingsopplysninger",
             "user_already_configured": "Kontoen er allerede konfigurert"
         },
-        "create_entry": {
-        },
         "error": {
             "invalid_credentials": "Ugyldige innloggingsopplysninger",
             "invalid_username": "Ugyldig brukernavn",
@@ -18,8 +16,7 @@
                     "password": "Passord",
                     "username": "Brukernavn",
                     "spin": "S-PIN",
-                    "region": "Region",
-                    "scan_interval": "Skanneintervall"
+                    "region": "Region"
                 },
                 "title": "Audi Connect kontoinformasjon"
             }

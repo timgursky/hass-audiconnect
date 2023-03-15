@@ -20,15 +20,5 @@
         "abort": {
             "already_configured": "Service déjà configuré"
         }
-    },
-    "options": {
-        "step": {
-            "init":{
-                "data": {
-                    "title": "Trace level (if debug mode HA enabled)",
-                    "level": "level"
-                }
-            }
-        }
-    }    
+    } 
 }

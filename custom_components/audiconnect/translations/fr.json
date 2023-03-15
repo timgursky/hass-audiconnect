@@ -20,15 +20,5 @@
         "abort": {
             "already_configured": "Service déjà configuré"
         }
-    },
-    "options": {
-        "step": {
-            "init":{
-                "data": {
-                    "title": "Nivreau de verbosité des traces de debug",
-                    "level": "Niveau"
-                }
-            }
-        }
-    }    
+    }  
 }
