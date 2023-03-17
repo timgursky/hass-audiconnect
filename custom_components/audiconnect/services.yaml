@@ -15,12 +15,14 @@ execute_vehicle_action:
   fields:
     vin:
       name: Device
+      description: Set VIN code
       required: true
       selector:
         device:
           integration: audiconnect  
     action:
       required: true
+      description: select service
       name: Action
       selector:
         select:
