@@ -4,6 +4,7 @@ Audi Connect Integration for Home Assistant
 ![GitHub release](https://img.shields.io/github/release/Cyr-ius/hass-audiconnect)
 ![Code Style][blackbadge]
 ![GitHub](https://img.shields.io/github/license/cyr-ius/hass-audiconnect)
+
 Description 
 ------------
 The `audiconnect` component provides an integration with the Audi Connect cloud service. It adds presence detection, sensors such as range, mileage, and fuel level, and provides car actions such as locking/unlocking and setting the pre-heater.
@@ -29,7 +30,7 @@ Configuration
 
 Configuration is done through the Home Assistant UI.
 
-To add the integration, go to **Settings ➤ Devices & Services ➤ Integrations**, click **➕ Add Integration**, and search for "Audi Connect".
+[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=audiconnect)
 
 ### Configuration Variables
 
