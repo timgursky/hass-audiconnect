@@ -35,35 +35,30 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Handle the initial step."""
-        if user_input is None:
-            return self.async_show_form(
-                step_id="user", data_schema=STEP_USER_DATA_SCHEMA
-            )
-
         errors = {}
-
-        try:
-            self._async_abort_entries_match({CONF_USERNAME: user_input[CONF_USERNAME]})
-            connection = AudiConnect(
-                async_create_clientsession(self.hass),
-                user_input[CONF_USERNAME],
-                user_input[CONF_PASSWORD],
-                user_input[CONF_COUNTRY],
-                user_input[CONF_PIN],
-            )
-            if await connection.async_login() is False:
-                raise AuthorizationError(
-                    "Unexpected error communicating with the Audi server"
+        if user_input:
+            try:
+                self._async_abort_entries_match({CONF_USERNAME: user_input[CONF_USERNAME]})
+                connection = AudiConnect(
+                    async_create_clientsession(self.hass),
+                    user_input[CONF_USERNAME],
+                    user_input[CONF_PASSWORD],
+                    user_input[CONF_COUNTRY],
+                    user_input.get(CONF_PIN),
                 )
-        except AudiException:
-            errors["base"] = "cannot_connect"
-        except AuthorizationError:
-            errors["base"] = "invalid_auth"
-        except Exception:  # pylint: disable=broad-except
-            _LOGGER.exception("Unexpected exception")
-            errors["base"] = "unknown"
-        else:
-            return self.async_create_entry(title="Audi connect", data=user_input)
+                if await connection.async_login() is False:
+                    raise AuthorizationError(
+                        "Unexpected error communicating with the Audi server"
+                    )
+            except AudiException:
+                errors["base"] = "cannot_connect"
+            except AuthorizationError:
+                errors["base"] = "invalid_auth"
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Unexpected exception")
+                errors["base"] = "unknown"
+            else:
+                return self.async_create_entry(title="Audi connect", data=user_input)
 
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors

@@ -95,22 +95,25 @@ class Auth:
                     _LOGGER.debug("RESPONSE: %s", response.status)
                     if raw_reply:
                         return response
-                    elif rsp_txt:
+                    if rsp_txt:
                         return await response.text()
-                    elif rsp_wtxt:
+                    if rsp_wtxt:
                         txt = await response.text()
                         return response, txt
-                    elif raw_contents:
+                    if raw_contents:
                         return await response.read()
-                    elif response.status == 200 or response.status == 202 or response.status == 207:
+                    if (
+                        response.status == 200
+                        or response.status == 202
+                        or response.status == 207
+                    ):
                         return await response.json(loads=json_loads)
-                    else:
-                        raise RequestError(
-                            response.request_info,
-                            response.history,
-                            status=response.status,
-                            message=response.reason,
-                        )
+                    raise RequestError(
+                        response.request_info,
+                        response.history,
+                        status=response.status,
+                        message=response.reason,
+                    )
         except (CancelledError, TimeoutError) as error:
             raise TimeoutExceededError("Timeout error") from error
         except RequestError as error:
@@ -294,7 +297,7 @@ class Auth:
         # forward1 after pwd
         fwd1_rsp = await self.request(
             "GET",
-            pw_rsp.headers["Location"],
+            pw_rsp.headers.get("Location", {}),
             None,
             headers=headers,
             cookies=idk_rsp.cookies,
@@ -305,7 +308,7 @@ class Auth:
         # forward2 after pwd
         fwd2_rsp = await self.request(
             "GET",
-            fwd1_rsp.headers["Location"],
+            fwd1_rsp.headers.get("Location", {}),
             None,
             headers=headers,
             cookies=idk_rsp.cookies,
@@ -316,7 +319,7 @@ class Auth:
         # get tokens
         codeauth_rsp = await self.request(
             "GET",
-            fwd2_rsp.headers["Location"],
+            fwd2_rsp.headers.get("Location", {}),
             None,
             headers=headers,
             cookies=fwd2_rsp.cookies,
@@ -325,7 +328,7 @@ class Auth:
         )
 
         authcode_parsed = urlparse(
-            codeauth_rsp.headers["Location"][len("myaudi:///?") :]
+            codeauth_rsp.headers.get("Location", {})[len("myaudi:///?") :]
         )
         authcode_strings = parse_qs(authcode_parsed.path)
 
@@ -509,6 +512,7 @@ class Auth:
         }
 
     async def async_get_simple_headers(self) -> dict[str, str]:
+        """Get simple headers."""
         await self.async_refresh_tokens()
         return {
             "Accept": "application/json",
