@@ -16,7 +16,7 @@
                 "data": {
                     "password": "Wachtwoord",
                     "username": "Gebruikersnaam",
-                    "spin": "S-PIN",
+                    "pin": "S-PIN",
                     "region": "Regio"
                 },
                 "title": "Audi Connect accountgegevens"

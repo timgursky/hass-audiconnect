@@ -1,24 +1,24 @@
 {
     "config": {
-        "step": {
-            "user": {
-                "title": "Enregistre ton compte",
-                "data": {
-                    "username": "Email",
-                    "password": "Mot de passe",
-                    "country": "Code pays",
-                    "pin": "Code Pin"
-                }
-            }
+        "abort": {
+            "already_configured": "Device is already exist"
         },
-        "flow_title": "{name}",        
         "error": {
             "cannot_connect": "Can not connect",
             "invalid_auth": "Invalid authentication",
             "unknown": "Unknown error"
         },
-        "abort": {
-            "already_configured": "Device is already exist"
+        "flow_title": "{name}",        
+        "step": {
+            "user": {
+                "title": "Register your account",
+                "data": {
+                    "username": "Email",
+                    "password": "Password",
+                    "country": "Country code",
+                    "pin": "Pin code"
+                }
+            }
         }
     } 
 }
