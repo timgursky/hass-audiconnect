@@ -1,17 +1,17 @@
 {
-  "domain": "audiconnect",
-  "name": "Audi Connect",
-  "config_flow": true,
-  "documentation": "https://github.com/cyr-ius/hass-audiconnect",
-  "issue_tracker": "https://github.com/cyr-ius/hass-audiconnect/issues",
-  "requirements": [],
-  "ssdp": [],
-  "zeroconf": [],
-  "homekit": {},
-  "dependencies": [],
   "after_dependencies": ["lock"],
   "codeowners": ["@cyr-ius"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/cyr-ius/hass-audiconnect",
+  "domain": "audiconnect",
+  "homekit": {},
   "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/cyr-ius/hass-audiconnect/issues",
+  "loggers": ["audiconnectpy"],
+  "name": "Audi Connect",
+  "requirements": [],
+  "ssdp": [],
   "version": "1.0.3",
-  "loggers": ["audiconnectpy"]
+  "zeroconf": []
 }
