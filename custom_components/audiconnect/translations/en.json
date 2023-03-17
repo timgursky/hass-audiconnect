@@ -1,6 +1,5 @@
 {
     "config": {
-        "flow_title": "{name}",
         "step": {
             "user": {
                 "title": "Enregistre ton compte",
@@ -12,13 +11,14 @@
                 }
             }
         },
+        "flow_title": "{name}",        
         "error": {
-            "cannot_connect": "Impossible de se connecter",
-            "invalid_auth": "Authentification invalide",
-            "unknown": "Erreur inconnue"
+            "cannot_connect": "Can not connect",
+            "invalid_auth": "Invalid authentication",
+            "unknown": "Unknown error"
         },
         "abort": {
-            "already_configured": "Service déjà configuré"
+            "already_configured": "Device is already exist"
         }
     } 
 }

@@ -10,6 +10,7 @@
             "unexpected": "Onverwachte fout bij communicatie met de Audi Connect server",
             "user_already_configured": "Account is al geconfigureerd"
         },
+        "flow_title": "{name}",        
         "step": {
             "user": {
                 "data": {
@@ -20,7 +21,6 @@
                 },
                 "title": "Audi Connect accountgegevens"
             }
-        },
-        "title": "Audi Connect"
+        }
     }
 }

@@ -1,6 +1,14 @@
 {
     "config": {
-        "flow_title": "{name}",
+        "abort": {
+            "already_configured": "Service déjà configuré"
+        },
+        "error": {
+            "cannot_connect": "Impossible de se connecter",
+            "invalid_auth": "Authentification invalide",
+            "unknown": "Erreur inconnue"
+        },
+        "flow_title": "{name}",        
         "step": {
             "user": {
                 "title": "Enregistre ton compte",
@@ -11,14 +19,6 @@
                     "pin": "Code Pin"
                 }
             }
-        },
-        "error": {
-            "cannot_connect": "Impossible de se connecter",
-            "invalid_auth": "Authentification invalide",
-            "unknown": "Erreur inconnue"
-        },
-        "abort": {
-            "already_configured": "Service déjà configuré"
-        }
+        }        
     }  
 }
