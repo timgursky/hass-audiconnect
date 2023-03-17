@@ -4,8 +4,8 @@ Audi Connect Integration for Home Assistant
 [![GitHub Activity][commits-shield]][commits]
 [![License][license-shield]](LICENSE.md)
 [![Code Style][blackbadge]][black]
+![GitHub release](https://img.shields.io/github/release/Cyr-ius/hass-audiconnect)
 
-[![hacs][hacsbadge]](hacs)
 
 Description
 ------------

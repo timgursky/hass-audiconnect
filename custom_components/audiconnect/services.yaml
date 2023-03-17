@@ -4,6 +4,7 @@ refresh_data:
   fields:
     vin:
       name: Device
+      description: your vehicle
       required: true
       selector:
         device:
@@ -15,12 +16,14 @@ execute_vehicle_action:
   fields:
     vin:
       name: Device
+      description: Set VIN code
       required: true
       selector:
         device:
           integration: audiconnect  
     action:
       required: true
+      description: service
       name: Action
       selector:
         select:
