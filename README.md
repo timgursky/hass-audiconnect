@@ -1,13 +1,10 @@
 Audi Connect Integration for Home Assistant
 ============================================================
 
-[![GitHub Activity][commits-shield]][commits]
-[![License][license-shield]](LICENSE.md)
-[![Code Style][blackbadge]][black]
 ![GitHub release](https://img.shields.io/github/release/Cyr-ius/hass-audiconnect)
-
-
-Description
+![Code Style][blackbadge]
+![GitHub](https://img.shields.io/github/license/cyr-ius/hass-audiconnect)
+Description 
 ------------
 The `audiconnect` component provides an integration with the Audi Connect cloud service. It adds presence detection, sensors such as range, mileage, and fuel level, and provides car actions such as locking/unlocking and setting the pre-heater.
 
@@ -19,11 +16,7 @@ Thank you at arjenvrh who knew how to maintain and evolve the code for many year
 Installation
 ------------
 
-There are two ways this integration can be installed into [Home Assistant](https://www.home-assistant.io).
-
-The easiest and recommended way is to install the integration using [HACS](https://hacs.xyz), which makes future updates easy to track and install.
-
-Alternatively, installation can be done manually by copying the files in this repository into the `custom_components` directory in the Home Assistant configuration directory:
+Installation can be done manually by copying the files in this repository into the `custom_components` directory in the Home Assistant configuration directory:
 1. Open the configuration directory of your Home Assistant installation.
 2. If you do not have a `custom_components` directory, create it.
 3. In the `custom_components` directory, create a new directory called `audiconnect`.
@@ -37,8 +30,6 @@ Configuration
 Configuration is done through the Home Assistant UI.
 
 To add the integration, go to **Settings ➤ Devices & Services ➤ Integrations**, click **➕ Add Integration**, and search for "Audi Connect".
-
-![Configuration](ha_config.png)
 
 ### Configuration Variables
 
@@ -56,15 +47,7 @@ To add the integration, go to **Settings ➤ Devices & Services ➤ Integrations
 
 **region**
 
-- (string)(Optional) The region where your Audi Connect account is registered. 
-   * 'DE' for Europe (or leave unset)
-   * 'US' for United States of America
-   * 'CA' for Canada
-   * 'CN' for China
-
-**scan_interval**
-
-- (number)(Optional) The frequency in minutes for how often to fetch status data from Audi Connect. (Optional. Default is 10 minutes, can be no more frequent than 1 min.)
+- (selector)(Required) The region where your Audi Connect account is registered. 
 
 Services
 --------
@@ -211,13 +194,5 @@ The card uses the following code in `ui-lovelace.yaml` (or wherever your Dashboa
             transform: none
 ```
 
-[buymecoffee]: https://buymeacoff.ee/arjenvrh
-[buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20beer-donate-yellow.svg?style=for-the-badge
-[commits-shield]: https://img.shields.io/github/commit-activity/y/arjenvrh/audi_connect_ha?style=for-the-badge
-[commits]: https://github.com/arjenvrh/audi_connect_ha/commits/master
-[hacs]: https://github.com/custom-components/hacs
-[hacsbadge]: https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge
-[license-shield]: https://img.shields.io/github/license/arjenvrh/audi_connect_ha?style=for-the-badge
-[maintenance-shield]: https://img.shields.io/badge/maintainer-Arjen%20van%20Rhijn%20%40arjenvrh-blue.svg?style=for-the-badge
-[blackbadge]: https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge
-[black]: https://github.com/ambv/black
+[blackbadge]: https://img.shields.io/badge/code%20style-black-000000.svg?style=flat
+
