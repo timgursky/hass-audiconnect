@@ -280,6 +280,7 @@ class AudiService:
 
     async def _async_get_security_token(self, vin: str, action: str) -> Any:
         """Get security token."""
+        self._spin = "" if self._spin is None else self._spin
         home_region_setter = await self._async_get_home_region_setter(vin.upper())
 
         # Challenge
