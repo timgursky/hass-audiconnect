@@ -38,7 +38,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input:
             try:
-                self._async_abort_entries_match({CONF_USERNAME: user_input[CONF_USERNAME]})
+                self._async_abort_entries_match(
+                    {CONF_USERNAME: user_input[CONF_USERNAME]}
+                )
                 connection = AudiConnect(
                     async_create_clientsession(self.hass),
                     user_input[CONF_USERNAME],
@@ -46,7 +48,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     user_input[CONF_COUNTRY],
                     user_input.get(CONF_PIN),
                 )
-                if await connection.async_login() is False:
+                if await connection.async_login(ntries=1) is False:
                     raise AuthorizationError(
                         "Unexpected error communicating with the Audi server"
                     )
