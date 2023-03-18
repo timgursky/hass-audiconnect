@@ -2,7 +2,7 @@ Audi Connect Integration for Home Assistant
 ============================================================
 
 ![GitHub release](https://img.shields.io/github/release/Cyr-ius/hass-audiconnect)
-![Code Style][blackbadge]
+![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat)
 ![GitHub](https://img.shields.io/github/license/cyr-ius/hass-audiconnect)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
@@ -84,116 +84,103 @@ Below is an example Dashboard (Lovelace) card illustrating some of the sensors t
 
 ![Example Dashboard Card](card_example.png)
 
-The card requires the following front end mods:
-- https://github.com/thomasloven/lovelace-card-mod
-- https://github.com/custom-cards/circle-sensor-card
-
-These mods can (like this integration) be installed using HACS.
-
-The card uses the following code in `ui-lovelace.yaml` (or wherever your Dashboard is configured).
-
 ```yaml
-     - type: picture-elements
-        image: /local/pictures/audi_sq7.jpeg
-        style: | 
-          ha-card {
-            border-radius: 10px;
-            border: solid 1px rgba(100,100,100,0.3);
-            box-shadow: 3px 3px rgba(0,0,0,0.4);
-            overflow: hidden;
-          } 
-        elements:
-        - type: image
-          image: /local/pictures/cardbackK.png
-          style:
-            left: 50%
-            top: 90%
-            width: 100%
-            height: 60px
+type: picture-elements
+image: '/local/audi.jpg '
+elements:
+  - type: state-icon
+    icon: mdi:car-door
+    entity: lock.audi_a4_berline_any_door_unlocked
+    tap_action:
+      action: toggle
+    style:
+      left: 12%
+      top: 86%
+      '--paper-item-icon-color': white
+      '--paper-item-icon-active-color': red
+  - type: state-label
+    entity: lock.audi_a4_berline_any_door_unlocked
+    style:
+      color: white
+      left: 12%
+      top: 95%
+  - type: icon
+    entity: sensor.audi_a4_berline_mileage
+    icon: mdi:speedometer
+    style:
+      color: white
+      left: 32%
+      top: 86%
+  - type: state-label
+    entity: sensor.audi_a4_berline_mileage
+    style:
+      color: white
+      left: 32%
+      top: 95%
+  - type: icon
+    icon: mdi:window-open
+    entity: binary_sensor.audi_a4_berline_any_window_open
+    style:
+      color: white
+      left: 52%
+      top: 86%
+  - type: state-label
+    entity: binary_sensor.audi_a4_berline_any_window_open
+    style:
+      color: white
+      left: 52%
+      top: 95%
+  - type: icon
+    icon: mdi:room-service-outline
+    entity: sensor.audi_a4_berline_service_inspection_distance
+    style:
+      color: white
+      left: 72%
+      top: 86%
+  - type: state-label
+    entity: sensor.audi_a4_berline_service_inspection_distance
+    style:
+      color: white
+      left: 72%
+      top: 95%
+  - type: state-icon
+    icon: mdi:tire
+    entity: binary_sensor.audi_a4_berline_any_tyre_pressure
+    style:
+      color: white
+      left: 90%
+      top: 86%
+      '--paper-item-icon-color': white
+      '--paper-item-icon-active-color': red
+  - type: state-label
+    entity: binary_sensor.audi_a4_berline_any_tyre_pressure
+    style:
+      color: white
+      left: 90%
+      top: 95%
+  - type: state-badge
+    entity: sensor.audi_a4_berline_tank_level
+    style:
+      color: transparent
+      left: 1%
+      top: 1%
+      transform: scale(0.7,0.7)
+      '--label-badge-red': gray
+      '--label-badge-background-color': transparent
+      '--ha-label-badge-label-color': black
+      '--label-badge-text-color': black
+  - type: state-badge
+    entity: sensor.audi_a4_berline_range
+    style:
+      color: transparent
+      right: 1%
+      top: 1%
+      transform: scale(0.7,0.7)
+      '--label-badge-red': gray
+      '--label-badge-background-color': transparent
+      '--ha-label-badge-label-color': black
+      '--label-badge-text-color': black
 
-        - type: icon
-          icon: mdi:car-door
-          entity: sensor.doors_trunk_sq7
-          tap_action: more_info
-          style: {color: white, left: 10%, top: 86%}
-        - type: state-label
-          entity: sensor.doors_trunk_sq7
-          style: {color: white, left: 10%, top: 95%}
-
-        - type: state-icon
-          entity: sensor.windows_sq7
-          tap_action: more_info
-          style: {color: white, left: 30%, top: 86%}
-        - type: state-label
-          entity: sensor.windows_sq7
-          style: {color: white, left: 30%, top: 95%}
-
-        - type: icon
-          icon: mdi:oil
-          entity: sensor.audi_sq7_oil_level
-          tap_action: more_info
-          style: {color: white, left: 50%, top: 86%}
-        - type: state-label
-          entity: sensor.audi_sq7_oil_level
-          style: {color: white, left: 50%, top: 95%}
-
-        - type: icon
-          icon: mdi:room-service-outline
-          entity: sensor.audi_sq7_service_inspection_time
-          tap_action: more_info
-          style: {color: white, left: 70%, top: 86%}
-        - type: state-label
-          entity: sensor.audi_sq7_service_inspection_time
-          style: {color: white, left: 70%, top: 95%}
-
-        - type: icon
-          icon: mdi:speedometer
-          entity: sensor.audi_sq7_mileage
-          tap_action: more_info
-          style: {color: white, left: 90%, top: 86%}
-        - type: state-label
-          entity: sensor.audi_sq7_mileage
-          style: {color: white, left: 90%, top: 95%}
-
-        - type: custom:circle-sensor-card
-          entity: sensor.audi_sq7_tank_level
-          max: 100
-          min: 0
-          stroke_width: 15
-          gradient: true
-          fill: '#aaaaaabb'
-          name: tank
-          units: ' '
-          font_style:
-            font-size: 1.0em
-            font-color: white
-            text-shadow: '1px 1px black'
-          style:
-            top: 5%
-            left: 80%
-            width: 4em
-            height: 4em
-            transform: none
-
-        - type: custom:circle-sensor-card
-          entity: sensor.audi_sq7_range
-          max: 630
-          min: 0
-          stroke_width: 15
-          gradient: true
-          fill: '#aaaaaabb'
-          name: range
-          units: ' '
-          font_style:
-            font-size: 1.0em
-            font-color: white
-            text-shadow: '1px 1px black'
-          style:
-            top: 5%
-            left: 5%
-            width: 4em
-            height: 4em
-            transform: none
 ```
 
 [blackbadge]: https://img.shields.io/badge/code%20style-black-000000.svg?style=flat
