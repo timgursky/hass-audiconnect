@@ -37,7 +37,7 @@ class AudiDataUpdateCoordinator(DataUpdateCoordinator):
             entry.data[CONF_USERNAME],
             entry.data[CONF_PASSWORD],
             entry.data[CONF_COUNTRY],
-            entry.data[CONF_PIN],
+            entry.data.get(CONF_PIN),
             unit_system,
         )
 
@@ -47,6 +47,7 @@ class AudiDataUpdateCoordinator(DataUpdateCoordinator):
             await self.api.async_update(None)
             if not self.api.is_connected:
                 raise UpdateFailed("Unable to connect")
-            return self.api.vehicles
         except AudiException as error:
             raise UpdateFailed(error) from error
+        else:
+            return self.api.vehicles
