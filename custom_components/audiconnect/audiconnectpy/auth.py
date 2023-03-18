@@ -475,11 +475,12 @@ class Auth:
     async def async_get_information_headers(self) -> dict[str, str]:
         """Return header for vehicle information."""
         await self.async_refresh_tokens()
+        token = self._audi_token.get("access_token")
         return {
             "Accept": "application/json",
             "Accept-Charset": "utf-8",
             "Accept-Language": f"{self._language}-{self._country.upper()}",
-            "Authorization": f"Bearer {self._audi_token['access_token']}",
+            "Authorization": f"Bearer {token}",
             "Content-Type": "application/json; charset=utf-8",
             "User-Agent": HDR_USER_AGENT,
             "X-App-Name": "myAudi",
@@ -490,10 +491,11 @@ class Auth:
     async def async_get_trip_headers(self) -> dict[str, str]:
         """Return header for trip information."""
         await self.async_refresh_tokens()
+        token = self._mbb_token.get("access_token")
         return {
             "Accept": "application/json",
             "Accept-Charset": "utf-8",
-            "Authorization": f"Bearer {self._mbb_token['access_token']}",
+            "Authorization": f"Bearer {token}",
             "User-Agent": HDR_USER_AGENT,
             "X-App-Name": "myAudi",
             "X-App-Version": HDR_XAPP_VERSION,
@@ -503,21 +505,23 @@ class Auth:
     async def async_get_security_headers(self) -> dict[str, str]:
         """Return header for security token."""
         await self.async_refresh_tokens()
+        token = self._mbb_token.get("access_token")
         return {
             "User-Agent": "okhttp/3.7.0",
             "X-App-Version": "3.14.0",
             "X-App-Name": "myAudi",
             "Accept": "application/json",
-            "Authorization": f"Bearer {self._mbb_token['access_token']}",
+            "Authorization": f"Bearer {token}",
         }
 
     async def async_get_simple_headers(self) -> dict[str, str]:
         """Get simple headers."""
         await self.async_refresh_tokens()
+        token = self._idk_token.get("access_token")
         return {
             "Accept": "application/json",
             "Accept-Charset": "utf-8",
-            "Authorization": f"Bearer {self._idk_token['access_token']}",
+            "Authorization": f"Bearer {token}",
             "User-Agent": HDR_USER_AGENT,
         }
 
