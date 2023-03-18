@@ -102,11 +102,7 @@ class Auth:
                         return response, txt
                     if raw_contents:
                         return await response.read()
-                    if (
-                        response.status == 200
-                        or response.status == 202
-                        or response.status == 207
-                    ):
+                    if response.status in [200, 202, 207]:
                         return await response.json(loads=json_loads)
                     raise RequestError(
                         response.request_info,
@@ -218,10 +214,6 @@ class Auth:
         ).strip("=")
         code_challenge_method = "S256"
 
-        #
-        state = str(uuid.uuid4())
-        nonce = str(uuid.uuid4())
-
         # login page
         headers = {
             "Accept": "application/json",
@@ -230,17 +222,19 @@ class Auth:
             "X-App-Name": "myAudi",
             "User-Agent": HDR_USER_AGENT,
         }
+
+        ui_locales = "{}-{} {}".format(self._language, self._language, self._language)
         idk_data = {
             "response_type": "code",
             "client_id": self._client_id,
             "redirect_uri": "myaudi:///",
             "scope": "address profile badge birthdate birthplace nationalIdentifier nationality profession email vin phone nickname name picture mbb gallery openid",
-            "state": state,
-            "nonce": nonce,
+            "state": str(uuid.uuid4()),
+            "nonce": str(uuid.uuid4()),
             "prompt": "login",
             "code_challenge": code_challenge,
             "code_challenge_method": code_challenge_method,
-            "ui_locales": "de-de de",
+            "ui_locales": ui_locales,
         }
         idk_rsp, idk_rsptxt = await self.request(
             "GET",
