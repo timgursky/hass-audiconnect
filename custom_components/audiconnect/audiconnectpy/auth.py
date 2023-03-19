@@ -2,28 +2,28 @@
 from __future__ import annotations
 
 import asyncio
-from asyncio import CancelledError, TimeoutError  # pylint: disable=redefined-builtin
 import base64
-from datetime import datetime, timedelta
-from hashlib import sha256
 import hmac
 import json
 import logging
 import os
 import re
+import socket
+import uuid
+from datetime import datetime, timedelta
+from hashlib import sha256
 from typing import Any
 from urllib.parse import parse_qs, urlencode, urlparse
-import uuid
 
-from aiohttp import ClientSession
-from aiohttp.hdrs import METH_GET, METH_POST, METH_PUT
+import aiohttp
 import async_timeout
+from aiohttp.hdrs import METH_GET, METH_POST, METH_PUT
 from bs4 import BeautifulSoup
 
 from .exceptions import (
     AudiException,
     HttpRequestError,
-    RequestError,
+    ServiceNotFoundError,
     TimeoutExceededError,
 )
 from .util import get_attr, jload, json_loads
@@ -42,7 +42,9 @@ _LOGGER = logging.getLogger(__name__)
 class Auth:
     """Authentication."""
 
-    def __init__(self, session: ClientSession, proxy: str | None = None) -> None:
+    def __init__(
+        self, session: aiohttp.ClientSession, proxy: str | None = None
+    ) -> None:
         """Initialize."""
         self._session = session
         if proxy:
@@ -77,53 +79,49 @@ class Auth:
         data: Any | None,
         headers: dict[str, str] | None = None,
         raw_reply: bool = False,
-        raw_contents: bool = False,
         rsp_wtxt: bool = False,
-        rsp_txt: bool = False,
         **kwargs: Any,
     ) -> Any:
         """Request url with method."""
         try:
-            with async_timeout.timeout(TIMEOUT):
-                _LOGGER.debug("HEADER: %s", headers)  # type: ignore
-                if method == "POST":
-                    _LOGGER.debug("POST DATA:%s", data)  # type: ignore
-                _LOGGER.debug("METHOD:%s URL:%s", method, url)
-                async with self._session.request(
+            async with async_timeout.timeout(TIMEOUT):
+                response = await self._session.request(
                     method, url, headers=headers, data=data, **kwargs
-                ) as response:
-                    _LOGGER.debug("RESPONSE: %s", response.status)
-                    if raw_reply:
-                        return response
-                    if rsp_txt:
-                        return await response.text()
-                    if rsp_wtxt:
-                        txt = await response.text()
-                        return response, txt
-                    if raw_contents:
-                        return await response.read()
-                    if response.status in [200, 202, 207]:
-                        return await response.json(loads=json_loads)
-                    raise RequestError(
-                        response.request_info,
-                        response.history,
-                        status=response.status,
-                        message=response.reason,
-                    )
-        except (CancelledError, TimeoutError) as error:
-            raise TimeoutExceededError("Timeout error") from error
-        except RequestError as error:
-            raise error
-        except Exception as error:
-            raise HttpRequestError(error) from error
+                )
+        except (asyncio.CancelledError, asyncio.TimeoutError) as error:
+            raise TimeoutExceededError(
+                "Timeout occurred while connecting to Audi Connect."
+            ) from error
+        except (aiohttp.ClientError, socket.gaierror) as exception:
+            raise HttpRequestError(
+                "Error occurred while communicating with Audit Connect."
+            ) from exception
 
-    async def get(
-        self,
-        url: str,
-        raw_reply: bool = False,
-        raw_contents: bool = False,
-        **kwargs: Any,
-    ) -> Any:
+        content_type = response.headers.get("Content-Type", "")
+        if response.status // 100 in [4, 5]:
+            contents = await response.read()
+            response.close()
+
+            if content_type == "application/json":
+                raise ServiceNotFoundError(
+                    response.status, json.loads(contents.decode("utf8"))
+                )
+            raise ServiceNotFoundError(
+                response.status, {"message": contents.decode("utf8")}
+            )
+
+        if raw_reply:
+            return response
+
+        if "application/json" in content_type:
+            return await response.json(loads=json_loads)
+
+        text = await response.text()
+        if rsp_wtxt:
+            return response, text
+        return text
+
+    async def get(self, url: str, raw_reply: bool = False, **kwargs: Any) -> Any:
         """GET request."""
         full_headers = await self.async_get_headers()
         response = await self.request(
@@ -132,7 +130,6 @@ class Auth:
             data=None,
             headers=full_headers,
             raw_reply=raw_reply,
-            raw_contents=raw_contents,
             **kwargs,
         )
         return response
@@ -157,7 +154,6 @@ class Auth:
         headers: dict[str, str] | None = None,
         use_json: bool = True,
         raw_reply: bool = False,
-        raw_contents: bool = False,
         **kwargs: Any,
     ) -> Any:
         """POST request."""
@@ -172,7 +168,6 @@ class Auth:
             headers=full_headers,
             data=data,
             raw_reply=raw_reply,
-            raw_contents=raw_contents,
             **kwargs,
         )
         return response
@@ -187,14 +182,14 @@ class Auth:
         except HttpRequestError as error:  # pylint: disable=broad-except
             if ntries > 1:
                 _LOGGER.error(
-                    "Login to Audi service failed, trying again in %s seconds",
+                    "Login to Audi service failed, trying again in %s seconds [ERROR:%s]",
                     DELAY,
+                    str(error),
                 )
                 await asyncio.sleep(DELAY)
                 return await self.async_connect(username, password, country, ntries - 1)
-            else:
-                _LOGGER.error("Login to Audi service failed: %s ", str(error))
-                return False
+            _LOGGER.error("Login to Audi service failed: %s ", str(error))
+            return False
         else:
             return True
 
@@ -223,7 +218,6 @@ class Auth:
             "User-Agent": HDR_USER_AGENT,
         }
 
-        ui_locales = "{}-{} {}".format(self._language, self._language, self._language)
         idk_data = {
             "response_type": "code",
             "client_id": self._client_id,
@@ -234,7 +228,7 @@ class Auth:
             "prompt": "login",
             "code_challenge": code_challenge,
             "code_challenge_method": code_challenge_method,
-            "ui_locales": ui_locales,
+            "ui_locales": f"{self._language}-{self._language} {self._language}",
         }
         idk_rsp, idk_rsptxt = await self.request(
             "GET",
@@ -256,7 +250,6 @@ class Auth:
             headers=headers,
             cookies=idk_rsp.cookies,
             allow_redirects=True,
-            rsp_txt=True,
         )
 
         # form_data with password
@@ -345,6 +338,7 @@ class Auth:
         self._mbb_token = await self._async_get_mbb_token(
             self._x_client_id, id_token=self._idk_token["id_token"]
         )
+
         # mbboauth refresh (app immediately refreshes the token)
         refresh_token = self._mbb_token["refresh_token"]
         self._mbb_token = await self._async_get_mbb_token(
@@ -554,7 +548,7 @@ class Auth:
             url_parts = urlparse(url)
             username_post_url = url_parts.scheme + "://" + url_parts.netloc + action
         else:
-            raise RequestError("Unknown form action: " + action)
+            raise AudiException(f"Unknown form action: {action}")
         return username_post_url
 
     # TR/2022-06-15: New secrect for X_QMAuth
@@ -630,10 +624,9 @@ class Auth:
             json.dumps(asz_req_data),
             headers=headers,
             allow_redirects=False,
-            rsp_txt=True,
         )
         azs_token_json = jload(azs_token_rsptxt)
-        _LOGGER.debug("AZS Token: %s", azs_token_json)  # type: ignore
+        _LOGGER.debug("AZS Token: %s", azs_token_json)
 
         return azs_token_json
 
@@ -676,10 +669,9 @@ class Auth:
             encoded_idk_data,
             headers=headers,
             allow_redirects=False,
-            rsp_txt=True,
         )
         idk_token_json = jload(idk_token_rsptxt)
-        _LOGGER.debug("IDK Token: %s", idk_token_json)  # type: ignore
+        _LOGGER.debug("IDK Token: %s", idk_token_json)
 
         return idk_token_json
 
@@ -706,7 +698,6 @@ class Auth:
             json.dumps(mbboauth_reg_data),
             headers=headers,
             allow_redirects=False,
-            rsp_txt=True,
         )
         mbboauth_client_reg_json = jload(mbboauth_client_reg_rsptxt)
         return mbboauth_client_reg_json.get("client_id")
@@ -744,9 +735,8 @@ class Auth:
             encoded_mbboauth_data,
             headers=headers,
             allow_redirects=False,
-            rsp_txt=True,
         )
         mbboauth_json = jload(mbboauth_rsptxt)
-        _LOGGER.debug("MBB Token: %s", mbboauth_json)  # type: ignore
+        _LOGGER.debug("MBB Token: %s", mbboauth_json)
 
         return mbboauth_json

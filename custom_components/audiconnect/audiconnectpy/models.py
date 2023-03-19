@@ -6,7 +6,7 @@ import logging
 from asyncio import TimeoutError  # pylint: disable=redefined-builtin
 from typing import TYPE_CHECKING, Any, Callable
 
-from .exceptions import HttpRequestError, RequestError, TimeoutExceededError
+from .exceptions import HttpRequestError, ServiceNotFoundError, TimeoutExceededError
 from .util import get_attr, set_attr
 
 if TYPE_CHECKING:
@@ -545,11 +545,11 @@ class Vehicle:
         self.support_climater: bool | None = None
         self.support_preheater: bool | None = None
         self.support_charger: bool | None = None
-        self.support_shortTerm: bool | None = None
-        self.support_longTerm: bool | None = None
+        self.support_short_term: bool | None = None
+        self.support_long_term: bool | None = None
         self.states: dict[Any, dict[str, Any]] = {}
 
-    async def call_update(self, func: Callable, ntries: int) -> None:
+    async def call_update(self, func: Callable[..., Any], ntries: int) -> None:
         """Call update."""
         try:
             await func()
@@ -600,8 +600,8 @@ class Vehicle:
                         set_attr("LAST_UPDATE_TIME", result.send_time_utc)
                     )
                     self.states.update(result.attributes)
-            except RequestError as error:
-                if error.status in (401, 403, 502):
+            except ServiceNotFoundError as error:
+                if error.args[0] in (401, 403, 502):
                     self.support_status = False
                 else:
                     _LOGGER.error(
@@ -609,7 +609,7 @@ class Vehicle:
                         self.vin,
                         str(error).rstrip("\n"),
                     )
-            except HttpRequestError as error:  # pylint: disable=broad-except
+            except HttpRequestError as error:
                 _LOGGER.error(
                     "Unable to obtain the vehicle  status report of %s: %s",
                     self.vin,
@@ -625,17 +625,17 @@ class Vehicle:
                 result = await self._audi_service.async_get_stored_position(self.vin)
                 if result.position_supported:
                     self.states.update(result.attributes)
-            except RequestError as error:
-                if error.status in (401, 403, 502):
+            except ServiceNotFoundError as error:
+                if error.args[0] in (401, 403, 502):
                     self.support_position = False
                 # If error is 204 is returned, the position is currently not available
-                elif error.status != 204:
+                elif error.args[0] != 204:
                     _LOGGER.error(
                         "Unable to update the vehicle position of %s: %s",
                         self.vin,
                         str(error).rstrip("\n"),
                     )
-            except HttpRequestError as error:  # pylint: disable=broad-except
+            except HttpRequestError as error:
                 _LOGGER.error(
                     "Unable to obtain the vehicle position of %s: %s",
                     self.vin,
@@ -651,8 +651,8 @@ class Vehicle:
                 result = await self._audi_service.async_get_climater(self.vin)
                 if result.climater_supported:
                     self.states.update(result.attributes)
-            except RequestError as error:
-                if error.status in (401, 403, 502):
+            except ServiceNotFoundError as error:
+                if error.args[0] in (401, 403, 502):
                     self.support_climater = False
                 else:
                     _LOGGER.error(
@@ -660,7 +660,7 @@ class Vehicle:
                         self.vin,
                         str(error).rstrip("\n"),
                     )
-            except HttpRequestError as error:  # pylint: disable=broad-except
+            except HttpRequestError as error:
                 _LOGGER.error(
                     "Unable to obtain the vehicle climatisation state for %s: %s",
                     self.vin,
@@ -676,8 +676,8 @@ class Vehicle:
                 result = await self._audi_service.async_get_preheater(self.vin)
                 if result.preheater_supported:
                     self.states.update(result.attributes)
-            except RequestError as error:
-                if error.status in (401, 403, 502):
+            except ServiceNotFoundError as error:
+                if error.args[0] in (401, 403, 502):
                     self.support_preheater = False
                 else:
                     _LOGGER.error(
@@ -685,7 +685,7 @@ class Vehicle:
                         self.vin,
                         str(error).rstrip("\n"),
                     )
-            except HttpRequestError as error:  # pylint: disable=broad-except
+            except HttpRequestError as error:
                 _LOGGER.error(
                     "Unable to obtain the vehicle preheater state for %s: %s",
                     self.vin,
@@ -701,8 +701,8 @@ class Vehicle:
                 result = await self._audi_service.async_get_charger(self.vin)
                 if result.charger_supported:
                     self.states.update(result.attributes)
-            except RequestError as error:
-                if error.status in (401, 403, 502):
+            except ServiceNotFoundError as error:
+                if error.args[0] in (401, 403, 502):
                     self.support_charger = False
                 else:
                     _LOGGER.error(
@@ -710,7 +710,7 @@ class Vehicle:
                         self.vin,
                         str(error).rstrip("\n"),
                     )
-            except HttpRequestError as error:  # pylint: disable=broad-except
+            except HttpRequestError as error:
                 _LOGGER.error(
                     "Unable to obtain the vehicle charger state for %s: %s",
                     self.vin,
@@ -721,11 +721,11 @@ class Vehicle:
 
     async def async_update_trip_longterm(self) -> None:
         """Update vehicle longterm trip."""
-        await self.async_update_tripdata("longTerm")
+        await self.async_update_tripdata("long_term")
 
     async def async_update_trip_shortterm(self) -> None:
         """Update vehicle shorterm trip."""
-        await self.async_update_tripdata("shortTerm")
+        await self.async_update_tripdata("short_term")
 
     async def async_update_tripdata(self, kind: str) -> None:
         """Update vehicle trip."""
@@ -743,8 +743,8 @@ class Vehicle:
                     self.states.update(
                         set_attr(f"{kind.lower()}_reset", td_rst.attributes)
                     )
-            except RequestError as error:
-                if error.status in (400, 401, 403, 502):
+            except ServiceNotFoundError as error:
+                if error.args[0] in (400, 401, 403, 502):
                     setattr(self, f"support_{kind}", False)
                 else:
                     _LOGGER.error(
@@ -753,7 +753,7 @@ class Vehicle:
                         self.vin,
                         str(error).rstrip("\n"),
                     )
-            except HttpRequestError as error:  # pylint: disable=broad-except
+            except HttpRequestError as error:
                 _LOGGER.error(
                     "Unable to obtain the vehicle %s tripdata of %s: %s",
                     kind,

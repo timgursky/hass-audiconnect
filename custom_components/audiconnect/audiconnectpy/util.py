@@ -1,16 +1,14 @@
 """Helper functions."""
 from __future__ import annotations
 
+import json
+import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from functools import reduce
-import json
-import logging
 from typing import Any
-
-from .exceptions import InvalidFormatError
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -509,12 +507,11 @@ def set_attr(
     return attribute
 
 
-def jload(json_data: str | bytes) -> Any:
+def jload(json_data: Any) -> Any:
     """Load json with error manage."""
-    try:
+    if not isinstance(json_data, dict):
         return json.loads(json_data)
-    except json.decoder.JSONDecodeError as error:
-        raise InvalidFormatError("Invalid json") from error
+    return json_data
 
 
 def obj_parser(obj: dict[str, Any]) -> dict[str, Any]:
