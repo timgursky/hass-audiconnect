@@ -92,16 +92,21 @@ class Auth:
             raise TimeoutExceededError(
                 "Timeout occurred while connecting to Audi Connect."
             ) from error
-        except (aiohttp.ClientError, socket.gaierror) as exception:
+        except (aiohttp.ClientError, socket.gaierror) as error:
+            _LOGGER.debug(
+                "HTTP Request error (%s) (%s): %s", str(url), str(data), str(error)
+            )
             raise HttpRequestError(
                 "Error occurred while communicating with Audit Connect."
-            ) from exception
+            ) from error
 
         content_type = response.headers.get("Content-Type", "")
         if response.status // 100 in [4, 5]:
             contents = await response.read()
             response.close()
-
+            _LOGGER.debug(
+                "[%s] Service not found: %s", response.status, contents.decode("utf8")
+            )
             if content_type == "application/json":
                 raise ServiceNotFoundError(
                     response.status, json.loads(contents.decode("utf8"))
