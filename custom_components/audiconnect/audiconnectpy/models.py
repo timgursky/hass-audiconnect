@@ -395,7 +395,7 @@ class ChargerDataResponse:
         _attributes.update(
             set_attr(
                 "REMAINING_CHARGING_TIME",
-                get_attr(_cruising_status, "secondaryEngineRange.content"),
+                get_attr(_status, "batteryStatusData.remainingChargingTime.content"),
             )
         )
 
