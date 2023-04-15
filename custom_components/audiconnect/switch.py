@@ -49,6 +49,11 @@ class AudiSwitch(AudiEntity, ToggleEntity):
     async def async_turn_on(self, **kwargs):
         """Turn the switch on."""
         try:
+            _LOGGER.debug(
+                "Turn on - Action: %s, id: %s",
+                self._entity["turn_mode"],
+                self._unique_id,
+            )
             await getattr(self.coordinator.api, self._entity["turn_mode"])(
                 self._unique_id, True
             )
@@ -59,12 +64,17 @@ class AudiSwitch(AudiEntity, ToggleEntity):
     async def async_turn_off(self, **kwargs):
         """Turn the switch off."""
         try:
+            _LOGGER.debug(
+                "Turn off - Action: %s, id: %s",
+                self._entity["turn_mode"],
+                self._unique_id,
+            )
             await getattr(self.coordinator.api, self._entity["turn_mode"])(
                 self._unique_id, False
             )
             await self.coordinator.async_request_refresh()
         except AudiException as error:
-            _LOGGER.error("Error to turn on : %s", error)
+            _LOGGER.error("Error to turn off : %s", error)
 
     @callback
     def _handle_coordinator_update(self) -> None:
