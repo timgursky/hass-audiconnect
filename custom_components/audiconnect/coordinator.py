@@ -44,7 +44,7 @@ class AudiDataUpdateCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self) -> dict:
         """Update data."""
         try:
-            await self.api.async_update(None)
+            await self.api.async_update()
             if not self.api.is_connected:
                 raise UpdateFailed("Unable to connect")
         except AudiException as error:
