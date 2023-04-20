@@ -1,9 +1,14 @@
 """Audi entity vehicle."""
+import logging
+
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
+from .const import DOMAIN, MANUFACTURER, URL_WEBSITE
 from .coordinator import AudiDataUpdateCoordinator
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class AudiEntity(CoordinatorEntity[AudiDataUpdateCoordinator], Entity):
@@ -14,16 +19,15 @@ class AudiEntity(CoordinatorEntity[AudiDataUpdateCoordinator], Entity):
     def __init__(self, coordinator: AudiDataUpdateCoordinator, vin: str) -> None:
         """Initialize the entity."""
         super().__init__(coordinator)
-        self.coordinator = coordinator
         self._unique_id = vin
         self._vehicle = coordinator.data[vin]
         self._attr_name = self._vehicle.title
         self._attr_device_info = {
             "identifiers": {(DOMAIN, vin)},
-            "manufacturer": "Audi",
+            "manufacturer": MANUFACTURER,
             "name": self._vehicle.title,
             "model": self._vehicle.model,
-            "configuration_url": "https://my.audi.com",
+            "configuration_url": URL_WEBSITE,
         }
         self._attr_extra_state_attributes = {
             "model": f"{self._vehicle.model}",
@@ -33,11 +37,7 @@ class AudiEntity(CoordinatorEntity[AudiDataUpdateCoordinator], Entity):
             "vin": self._unique_id,
         }
 
-    async def async_added_to_hass(self) -> None:
-        """When entity is added to hass."""
-        await super().async_added_to_hass()
-        self._handle_coordinator_update()
-
-    def format_name(self, name):
+    @staticmethod
+    def format_name(name):
         """Format beautiful name."""
         return name.capitalize().replace("_", " ")
