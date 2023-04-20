@@ -52,10 +52,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     raise AuthorizationError(
                         "Unexpected error communicating with the Audi server"
                     )
-            except AudiException:
-                errors["base"] = "cannot_connect"
             except AuthorizationError:
                 errors["base"] = "invalid_auth"
+            except AudiException:
+                errors["base"] = "cannot_connect"
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
