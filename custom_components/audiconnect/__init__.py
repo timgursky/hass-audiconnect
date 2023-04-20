@@ -1,14 +1,15 @@
 """The Audi connect integration."""
 from __future__ import annotations
 
-import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import device_registry as dr
+import homeassistant.helpers.config_validation as cv
 
-from .const import CONF_VIN, DOMAIN, CONF_ACTION
+from .const import CONF_ACTION, CONF_VIN, DOMAIN
 from .coordinator import AudiDataUpdateCoordinator
 
 PLATFORMS: list[Platform] = [
@@ -55,28 +56,29 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         vin = dict(device.identifiers).get(DOMAIN)
         action = call.data.get(CONF_ACTION).lower()
 
-        if action == "lock":
-            await coordinator.api.async_set_lock(vin, True)
-        if action == "unlock":
-            await coordinator.api.async_set_lock(vin, False)
-        if action == "start_climatisation":
-            await coordinator.api.async_set_climatisation(vin, True)
-        if action == "stop_climatisation":
-            await coordinator.api.async_set_climatisation(vin, False)
-        if action == "start_charger":
-            await coordinator.api.async_set_battery_charger(vin, True, False)
-        if action == "start_timed_charger":
-            await coordinator.api.async_set_battery_charger(vin, True, True)
-        if action == "stop_charger":
-            await coordinator.api.async_set_battery_charger(vin, False, False)
-        if action == "start_preheater":
-            await coordinator.api.async_set_pre_heater(vin, True)
-        if action == "stop_preheater":
-            await coordinator.api.async_set_pre_heater(vin, False)
-        if action == "start_window_heating":
-            await coordinator.api.async_set_window_heating(vin, True)
-        if action == "stop_window_heating":
-            await coordinator.api.async_set_window_heating(vin, False)
+        match action:
+            case "lock":
+                await coordinator.api.async_set_lock(vin, True)
+            case "unlock":
+                await coordinator.api.async_set_lock(vin, False)
+            case "start_climatisation":
+                await coordinator.api.async_set_climatisation(vin, True)
+            case "stop_climatisation":
+                await coordinator.api.async_set_climatisation(vin, False)
+            case "start_charger":
+                await coordinator.api.async_set_battery_charger(vin, True, False)
+            case "start_timed_charger":
+                await coordinator.api.async_set_battery_charger(vin, True, True)
+            case "stop_charger":
+                await coordinator.api.async_set_battery_charger(vin, False, False)
+            case "start_preheater":
+                await coordinator.api.async_set_pre_heater(vin, True)
+            case "stop_preheater":
+                await coordinator.api.async_set_pre_heater(vin, False)
+            case "start_window_heating":
+                await coordinator.api.async_set_window_heating(vin, True)
+            case "stop_window_heating":
+                await coordinator.api.async_set_window_heating(vin, False)
 
         await coordinator.async_request_refresh()
 
@@ -109,3 +111,10 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry):
     """Reload device tracker if change option."""
     await hass.config_entries.async_reload(entry.entry_id)
+
+
+async def async_remove_config_entry_device(
+    hass: HomeAssistant, config_entry: ConfigEntry, device_entry: dr.DeviceEntry
+) -> bool:
+    """Remove config entry from a device."""
+    return True
