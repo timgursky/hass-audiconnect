@@ -61,3 +61,5 @@ COUNTRY_CODE = {
     "ZA": "South Africa",
     "BA": "Bosnia and Herzegovina",
 }
+MANUFACTURER = "Audi"
+URL_WEBSITE = "https://my.audi.com"
