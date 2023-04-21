@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Literal
 
 from aiohttp import ClientSession
 
@@ -37,24 +38,24 @@ class AudiConnect:
     ) -> None:
         """Initiliaze."""
         Globals(unit_system)
-        self._auth = Auth(session)
-        self._audi_service = AudiService(self._auth, country, spin)
-        self._username = username
-        self._password = password
-        self._country = country
-        self._unit_system = unit_system
-        self._connect_retries = 3
-        self._connect_delay = 10
         self._audi_vehicles: list[Vehicle] = []
+        self._auth = Auth(session)
+        self._connect_delay = 10
+        self._connect_retries = 3
+        self._country = country
         self._excluded_refresh: set[str] = set()
+        self._password = password
+        self._unit_system = unit_system
+        self._username = username
         self.is_connected: bool = False
+        self.services = AudiService(self._auth, country, spin)
         self.vehicles: dict[str, Vehicle] = {}
 
-    async def async_login(self, ntries: int = 3) -> bool:
+    async def async_login(self) -> bool:
         """Login and retreive tokens."""
         if not self.is_connected:
             self.is_connected = await self._auth.async_connect(
-                self._username, self._password, self._country, ntries
+                self._username, self._password, self._country
             )
         return self.is_connected
 
@@ -71,10 +72,12 @@ class AudiConnect:
 
             else:
                 vehicles_response = (
-                    await self._audi_service.async_get_vehicle_information()
+                    await self.services.async_get_vehicle_information()
                 )
+                if vehicles_response.get("userVehicles") is None:
+                    return False
                 for response in vehicles_response.get("userVehicles"):
-                    self._audi_vehicles.append(Vehicle(response, self._audi_service))
+                    self._audi_vehicles.append(Vehicle(response, self.services))
 
                 self.vehicles = {}
                 for vehicle in self._audi_vehicles:
@@ -119,7 +122,7 @@ class AudiConnect:
         try:
             if vin not in self._excluded_refresh:
                 _LOGGER.debug("Sending command to refresh data to vehicle %s", vin)
-                await self._audi_service.async_refresh_vehicle_data(vin)
+                await self.services.async_refresh_vehicle_data(vin)
                 _LOGGER.debug("Successfully refreshed data of vehicle %s", vin)
                 return True
         except ServiceNotFoundError as error:
@@ -131,7 +134,7 @@ class AudiConnect:
                 try:
                     self.is_connected = False
                     await self.async_login()
-                    await self._audi_service.async_refresh_vehicle_data(vin)
+                    await self.services.async_refresh_vehicle_data(vin)
                 except ServiceNotFoundError as err:
                     _LOGGER.error(
                         "Unable to refresh vehicle data of %s, despite trying again (%s)",
@@ -156,7 +159,7 @@ class AudiConnect:
 
         return True
 
-    async def async_set_lock(self, vin: str, lock: bool) -> bool:
+    async def async_switch_lock(self, vin: str, lock: bool) -> bool:
         """Set lock."""
         if not await self.async_login():
             return False
@@ -164,7 +167,7 @@ class AudiConnect:
         try:
             action = "lock" if lock else "unlock"
             _LOGGER.debug("Sending command to %s to vehicle %s", action, vin)
-            await self._audi_service.async_set_lock(vin, lock)
+            await self.services.async_lock(vin, lock)
             action = "locked" if lock else "unlocked"
             _LOGGER.debug("Successfully %s vehicle %s", action, vin)
             return True
@@ -177,7 +180,7 @@ class AudiConnect:
             )
             return False
 
-    async def async_set_climatisation(self, vin: str, activate: bool) -> bool:
+    async def async_switch_climater(self, vin: str, activate: bool) -> bool:
         """Set climatisation."""
         if not await self.async_login():
             return False
@@ -187,7 +190,7 @@ class AudiConnect:
             _LOGGER.debug(
                 "Sending command to %s climatisation to vehicle %s", action, vin
             )
-            await self._audi_service.async_set_climatisation(vin, activate)
+            await self.services.async_climater(vin, activate)
             action = "started" if activate else "stopped"
             _LOGGER.debug("Successfully %s climatisation of vehicle %s", action, vin)
             return True
@@ -200,25 +203,49 @@ class AudiConnect:
             )
             return False
 
-    async def async_set_battery_charger(
-        self, vin: str, activate: bool, timer: bool = False
+    async def async_set_climater_temperature(
+        self,
+        vin: str,
+        temperature: float,
+        source: Literal["electric", "auxiliary", "automatic"],
     ) -> bool:
+        """Set temperature of climater."""
+        if not await self.async_login():
+            return False
+
+        try:
+            _LOGGER.debug(
+                "Sending command to climater (%s) [%s] to vehicle %s",
+                temperature,
+                source,
+                vin,
+            )
+            await self.services.async_climater_temp(vin, temperature, source)
+            _LOGGER.debug("Successfully settings climater of vehicle %s", vin)
+            return True
+        except ServiceNotFoundError as error:
+            _LOGGER.error(
+                "Unable to set climatisater of vehicle %s:  %s",
+                vin,
+                str(error).rstrip("\n"),
+            )
+            return False
+
+    async def async_switch_charger(self, vin: str, activate: bool) -> bool:
         """Set charger."""
         if not await self.async_login():
             return False
 
         try:
             action: str = "start" if activate else "stop"
-            timed: str = " timed" if timer else ""
             _LOGGER.debug(
-                "Sending command to %s%s charger to vehicle %s",
+                "Sending command to %s charger to vehicle %s",
                 action,
-                timed,
                 vin,
             )
-            await self._audi_service.async_set_battery_charger(vin, activate, timer)
+            await self.services.async_charger(vin, activate)
             action = "started" if activate else "stopped"
-            _LOGGER.debug("Successfully %s%s charger of vehicle %s", action, timed, vin)
+            _LOGGER.debug("Successfully %s charger of vehicle %s", action, vin)
             return True
         except ServiceNotFoundError as error:
             action = "start" if activate else "stop"
@@ -230,7 +257,25 @@ class AudiConnect:
             )
             return False
 
-    async def async_set_window_heating(self, vin: str, activate: bool) -> bool:
+    async def async_set_charger_max_current(self, vin: str, current: int = 32) -> bool:
+        """Set pre heater."""
+        if not await self.async_login():
+            return False
+
+        try:
+            _LOGGER.debug("Sending command max current to vehicle %s", vin)
+            await self.services.async_charger_max(vin, current)
+            _LOGGER.debug("Successfully set max current of vehicle %s", vin)
+            return True
+        except ServiceNotFoundError as error:
+            _LOGGER.error(
+                "Unable set max current of vehicle %s: %s",
+                vin,
+                str(error).rstrip("\n"),
+            )
+            return False
+
+    async def async_switch_window_heating(self, vin: str, activate: bool) -> bool:
         """Set window heating."""
         if not await self.async_login():
             return False
@@ -240,7 +285,7 @@ class AudiConnect:
             _LOGGER.debug(
                 "Sending command to %s window heating to vehicle %s", action, vin
             )
-            await self._audi_service.async_set_window_heating(vin, activate)
+            await self.services.async_window_heating(vin, activate)
             action = "started" if activate else "stopped"
             _LOGGER.debug("Successfully %s window heating of vehicle %s", action, vin)
             return True
@@ -253,7 +298,7 @@ class AudiConnect:
             )
             return False
 
-    async def async_set_pre_heater(self, vin: str, activate: bool) -> bool:
+    async def async_switch_pre_heating(self, vin: str, activate: bool) -> bool:
         """Set pre heater."""
         if not await self.async_login():
             return False
@@ -261,13 +306,59 @@ class AudiConnect:
         try:
             action = "start" if activate else "stop"
             _LOGGER.debug("Sending command to %s pre-heater to vehicle %s", action, vin)
-            await self._audi_service.async_set_pre_heater(vin, activate)
+            await self.services.async_pre_heating(vin, activate)
             action = "started" if activate else "stopped"
             _LOGGER.debug("Successfully %s pre-heater of vehicle %s", action, vin)
             return True
         except ServiceNotFoundError as error:
             _LOGGER.error(
                 "Unable to %s pre-heater of vehicle %s: %s",
+                action,
+                vin,
+                str(error).rstrip("\n"),
+            )
+            return False
+
+    async def async_honk_flash(
+        self, vin: str, mode: Literal["honk", "flash"], duration: int
+    ) -> bool:
+        """Set honk/flash."""
+        if not await self.async_login():
+            return False
+
+        try:
+            _LOGGER.debug("Sending command Honk/Flash to vehicle %s", vin)
+            await self.services.async_honkflash(vin, mode, duration)
+            _LOGGER.debug("Successfully Honk/Flash of vehicle %s", vin)
+            return True
+        except ServiceNotFoundError as error:
+            _LOGGER.error(
+                "Unable Honk/Flash of vehicle %s: %s",
+                vin,
+                str(error).rstrip("\n"),
+            )
+            return False
+
+    async def async_switch_ventilation(self, vin: str, activate: bool) -> bool:
+        """Set charger."""
+        if not await self.async_login():
+            return False
+
+        try:
+            action: str = "start" if activate else "stop"
+            _LOGGER.debug(
+                "Sending command to %s ventilation to vehicle %s",
+                action,
+                vin,
+            )
+            await self.services.async_ventilation(vin, activate)
+            action = "started" if activate else "stopped"
+            _LOGGER.debug("Successfully %s charger of vehicle %s", action, vin)
+            return True
+        except ServiceNotFoundError as error:
+            action = "start" if activate else "stop"
+            _LOGGER.error(
+                "Unable to %s ventilation of vehicle %s: %s",
                 action,
                 vin,
                 str(error).rstrip("\n"),

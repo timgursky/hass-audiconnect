@@ -1,14 +1,18 @@
 """Helper functions."""
 from __future__ import annotations
 
+import functools
 import json
 import logging
-from collections.abc import Callable
+import random
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from functools import reduce
-from typing import Any
+from typing import Any, Callable
+
+from .exceptions import TimeoutExceededError
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -20,7 +24,7 @@ class FieldType:
     name: str | None = None
     attr: str | None = None
     sensor_type: str | None = None
-    unit: str | None = None
+    unit_of_measurement: str | None = None
     evaluation: Callable[[Any], Any] | None = None
     device_class: str | None = None
     icon: str | None = None
@@ -36,7 +40,7 @@ class Identities(Enum):
         attr="mileage",
         sensor_type="sensor",
         icon="mdi:speedometer",
-        unit="km",
+        unit_of_measurement="km",
         evaluation=lambda x: int(x),
         device_class="distance",
     )
@@ -45,7 +49,7 @@ class Identities(Enum):
         sensor_type="sensor",
         evaluation=lambda x: abs(int(x)),
         icon="mdi:oil",
-        unit="km",
+        unit_of_measurement="km",
         device_class="distance",
     )
     MAINTENANCE_INTERVAL_TIME_TO_OIL_CHANGE = FieldType(
@@ -53,14 +57,14 @@ class Identities(Enum):
         sensor_type="sensor",
         evaluation=lambda x: abs(int(x)),
         icon="mdi:oil",
-        unit="d",
+        unit_of_measurement="d",
         device_class="duration",
     )
     MAINTENANCE_INTERVAL_DISTANCE_TO_INSPECTION = FieldType(
         attr="service_inspection_distance",
         sensor_type="sensor",
         icon="mdi:room-service-outline",
-        unit="km",
+        unit_of_measurement="km",
         evaluation=lambda x: abs(int(x)),
         device_class="distance",
     )
@@ -68,7 +72,7 @@ class Identities(Enum):
         attr="service_inspection_time",
         sensor_type="sensor",
         icon="mdi:room-service-outline",
-        unit="d",
+        unit_of_measurement="d",
         evaluation=lambda x: abs(int(x)),
         device_class="duration",
     )
@@ -83,10 +87,16 @@ class Identities(Enum):
         sensor_type="sensor",
         evaluation=lambda x: float(x),
         icon="mdi:oil",
-        unit="%",
+        unit_of_measurement="%",
     )
     OIL_DISPLAY = FieldType(
         attr="oil_display",
+        sensor_type="binary_sensor",
+        evaluation=lambda x: x == "1",
+        icon="mdi:oil",
+    )
+    OIL_LEVEL_VALID = FieldType(
+        attr="oil_level_valid",
         sensor_type="binary_sensor",
         evaluation=lambda x: x == "1",
         icon="mdi:oil",
@@ -122,7 +132,7 @@ class Identities(Enum):
         sensor_type="sensor",
         evaluation=lambda x: int(x),
         icon="mdi:gas-station",
-        unit="km",
+        unit_of_measurement="km",
         device_class="distance",
     )
     TANK_LEVEL_IN_PERCENTAGE = FieldType(
@@ -130,54 +140,54 @@ class Identities(Enum):
         sensor_type="sensor",
         evaluation=lambda x: int(x),
         icon="mdi:gas-station",
-        unit="%",
+        unit_of_measurement="%",
     )
     LOCK_STATE_LEFT_FRONT_DOOR = FieldType(
         attr="unlock_left_front_door",
         sensor_type="binary_sensor",
-        evaluation=lambda x: not (x == "2"),
+        evaluation=lambda x: x != "2",
         device_class="lock",
     )
     LOCK_STATE_LEFT_REAR_DOOR = FieldType(
         attr="unlock_left_rear_door",
         sensor_type="binary_sensor",
-        evaluation=lambda x: not (x == "2"),
+        evaluation=lambda x: x != "2",
         device_class="lock",
     )
     LOCK_STATE_RIGHT_FRONT_DOOR = FieldType(
         attr="unlock_right_front_door",
         sensor_type="binary_sensor",
-        evaluation=lambda x: not (x == "2"),
+        evaluation=lambda x: x != "2",
         device_class="lock",
     )
     LOCK_STATE_RIGHT_REAR_DOOR = FieldType(
         attr="unlock_right_rear_door",
         sensor_type="binary_sensor",
-        evaluation=lambda x: not (x == "2"),
+        evaluation=lambda x: x != "2",
         device_class="lock",
     )
     OPEN_STATE_LEFT_FRONT_DOOR = FieldType(
         attr="open_left_front_door",
         sensor_type="binary_sensor",
-        evaluation=lambda x: not (x == "3"),
+        evaluation=lambda x: x != "3",
         device_class="door",
     )
     OPEN_STATE_LEFT_REAR_DOOR = FieldType(
         attr="open_left_rear_door",
         sensor_type="binary_sensor",
-        evaluation=lambda x: not (x == "3"),
+        evaluation=lambda x: x != "3",
         device_class="door",
     )
     OPEN_STATE_RIGHT_FRONT_DOOR = FieldType(
         attr="open_right_front_door",
         sensor_type="binary_sensor",
-        evaluation=lambda x: not (x == "3"),
+        evaluation=lambda x: x != "3",
         device_class="door",
     )
     OPEN_STATE_RIGHT_REAR_DOOR = FieldType(
         attr="open_right_rear_door",
         sensor_type="binary_sensor",
-        evaluation=lambda x: not (x == "3"),
+        evaluation=lambda x: x != "3",
         device_class="door",
     )
     LOCK_STATE_TRUNK_LID = FieldType(
@@ -232,7 +242,13 @@ class Identities(Enum):
         attr="sun_roof",
         sensor_type="binary_sensor",
         evaluation=lambda x: x == "2",
-        device_class="window",
+        device_class="cover",
+    )
+    STATE_SPOILER = FieldType(
+        attr="spoiler",
+        sensor_type="binary_sensor",
+        evaluation=lambda x: x != "3",
+        device_class="lock",
     )
     TYRE_PRESSURE_LEFT_FRONT_TYRE_DIFFERENCE = FieldType(
         attr="tyre_pressure_left_front",
@@ -270,27 +286,27 @@ class Identities(Enum):
         attr="preheater_state",
         evaluation=lambda x: x is not None,
         sensor_type="switch",
-        turn_mode="async_set_vehicle_pre_heater",
+        turn_mode="async_switch_pre_heating",
     )
     PREHEATER_ACTIVE = FieldType(
         attr="preheater_active",
         evaluation=lambda x: x != "off",
         sensor_type="switch",
-        turn_mode="async_set_vehicle_window_heating",
+        turn_mode="async_switch_pre_heating",
     )
     PREHEATER_DURATION = FieldType(
         attr="preheater_duration",
         evaluation=lambda x: int(x),
         sensor_type="sensor",
         icon="mdi:clock",
-        unit="Min",
+        unit_of_measurement="Min",
     )
     PREHEATER_REMAINING = FieldType(
         attr="preheater_remaining",
         evaluation=lambda x: int(x),
         sensor_type="sensor",
         icon="mdi:clock",
-        unit="Min",
+        unit_of_measurement="Min",
     )
 
     # Charger
@@ -298,7 +314,7 @@ class Identities(Enum):
         attr="max_charge_current",
         sensor_type="sensor",
         icon="mdi:current-ac",
-        unit="A",
+        unit_of_measurement="A",
     )
     CHARGING_STATE = FieldType(
         attr="charging_state",
@@ -320,14 +336,14 @@ class Identities(Enum):
         attr="charging_power",
         sensor_type="sensor",
         icon="mdi:flash",
-        unit="kW",
+        unit_of_measurement="kW",
         evaluation=lambda x: int(x) / 1000,
         device_class="power",
     )
     CHARGING_MODE = FieldType(
         attr="charging_mode",
         sensor_type="switch",
-        turn_mode="async_set_battery_charger",
+        turn_mode="async_switch_charger",
     )
     ENERGY_FLOW = FieldType(
         attr="energy_flow",
@@ -351,23 +367,28 @@ class Identities(Enum):
         attr="primary_engine_range",
         sensor_type="sensor",
         icon="mdi:gas-station-outline",
-        unit="km",
+        unit_of_measurement="km",
     )
     SECONDARY_ENGINE_RANGE = FieldType(
         attr="secondary_engine_range",
         sensor_type="sensor",
         icon="mdi:gas-station-outline",
-        unit="km",
+        unit_of_measurement="km",
     )
     STATE_OF_CHARGE = FieldType(
         attr="state_of_charge",
         sensor_type="sensor",
         icon="mdi:ev-station",
-        unit="%",
+        unit_of_measurement="%",
         device_class="power_factor",
     )
     PLUG_STATE = FieldType(
         attr="plug_state",
+        sensor_type="sensor",
+        icon="mdi:power-plug",
+    )
+    PLUG_LOCK = FieldType(
+        attr="plug_lock",
         sensor_type="sensor",
         icon="mdi:power-plug",
     )
@@ -384,13 +405,27 @@ class Identities(Enum):
     CLIMATISATION_STATE = FieldType(
         attr="climatisation_state",
         icon="mdi:air-conditioner",
+        sensor_type="switch",
+        turn_mode="async_switch_climater",
+    )
+    CLIMATISATION_TARGET_TEMP = FieldType(
+        attr="climatisation_target_temperature",
+        icon="mdi:temperature-celsius",
+        sensor_type="sensor",
+        unit_of_measurement="°C",
+        evaluation=lambda x: round(float(x) / 10 - 273, 1),
+        device_class="temperature",
+    )
+    CLIMATISATION_HEATER_SRC = FieldType(
+        attr="climatisation_heater_source",
+        icon="mdi:air-conditioner",
         sensor_type="sensor",
     )
     OUTDOOR_TEMPERATURE = FieldType(
         attr="outdoor_temperature",
         sensor_type="sensor",
         icon="mdi:temperature-celsius",
-        unit="°C",
+        unit_of_measurement="°C",
         evaluation=lambda x: round(float(x) / 10 - 273, 1),
         device_class="temperature",
     )
@@ -415,7 +450,7 @@ class Identities(Enum):
         attr="any_door_unlocked",
         sensor_type="lock",
         device_class="lock",
-        turn_mode="async_set_lock",
+        turn_mode="async_switch_lock",
     )
     ANY_DOOR_OPEN = FieldType(
         attr="any_door_open", sensor_type="binary_sensor", device_class="door"
@@ -496,7 +531,9 @@ def set_attr(
             {
                 field_type.attr: {
                     "value": value,
-                    "unit": field_type.unit if unit is None else unit,
+                    "unit_of_measurement": field_type.unit_of_measurement
+                    if unit is None
+                    else unit,
                     "device_class": field_type.device_class,
                     "icon": field_type.icon,
                     "sensor_type": field_type.sensor_type,
@@ -527,3 +564,60 @@ def obj_parser(obj: dict[str, Any]) -> dict[str, Any]:
 def json_loads(jsload: str | bytes) -> Any:
     """Json load."""
     return json.loads(jsload, object_hook=obj_parser)
+
+
+def retry(
+    exceptions: Any = Exception,
+    tries: int = -1,
+    delay: float = 0,
+    max_delay: int | None = None,
+    backoff: int = 1,
+    jitter: int | tuple[int, int] = 0,
+    logger: Any = _LOGGER,
+) -> Callable[..., Any]:
+    """Retry Decorator.
+
+    :param exceptions: an exception or a tuple of exceptions to catch. default: Exception.
+    :param tries: the maximum number of attempts. default: -1 (infinite).
+    :param delay: initial delay between attempts. default: 0.
+    :param max_delay: the maximum value of delay. default: None (no limit).
+    :param backoff: multiplier applied to delay between attempts. default: 1 (no backoff).
+    :param jitter: extra seconds added to delay between attempts. default: 0.
+                   fixed if a number, random if a range tuple (min, max)
+    :param logger: logger.warning(fmt, error, delay) will be called on failed attempts.
+                   default: retry.logging_logger. if None, logging is disabled.
+    :returns: the result of the f function.
+    """
+
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+        """Add decorator."""
+
+        @functools.wraps(func)
+        async def newfn(*args: Any, **kwargs: Any) -> Any:
+            """Load function."""
+            _tries, _delay = tries, delay
+            while _tries:
+                try:
+                    return await func(*args, **kwargs)
+                except exceptions as error:  # pylint: disable=broad-except
+                    _tries -= 1
+                    if not _tries:
+                        raise TimeoutExceededError(error) from error
+
+                    if logger is not None:
+                        logger.warning("%s, retrying in %s seconds...", error, _delay)
+
+                    time.sleep(_delay)
+                    _delay *= backoff
+
+                    if isinstance(jitter, tuple):
+                        _delay += random.uniform(*jitter)
+                    else:
+                        _delay += jitter
+
+                    if max_delay is not None:
+                        _delay = min(_delay, max_delay)
+
+        return newfn
+
+    return decorator
