@@ -434,10 +434,11 @@ class Auth:
     ) -> dict[str, str]:
         """Return header for vehicle action."""
         await self.async_refresh_tokens()
+        token = self._mbb_token.get("access_token")
         headers = {
             "Accept": "application/json, application/vnd.vwg.mbb.ChargerAction_v1_0_0+xml,application/vnd.volkswagenag.com-error-v1+xml,application/vnd.vwg.mbb.genericError_v1_0_2+xml, application/vnd.vwg.mbb.RemoteStandheizung_v2_0_0+xml, application/vnd.vwg.mbb.genericError_v1_0_2+xml,application/vnd.vwg.mbb.RemoteLockUnlock_v1_0_0+xml,*/*",
             "Accept-charset": "utf-8",
-            "Authorization": f"Bearer {self._mbb_token['access_token']}",
+            "Authorization": f"Bearer {token}",
             "Content-Type": content_type,
             "Host": "msg.volkswagen.de",
             "User-Agent": "okhttp/3.7.0",
