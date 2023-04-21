@@ -3,7 +3,6 @@ import logging
 
 from homeassistant.components.sensor import DOMAIN as domain_sensor, SensorEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_DEVICE_CLASS, ATTR_ICON
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -31,18 +30,11 @@ async def async_setup_entry(
 class AudiSensor(AudiEntity, SensorEntity):
     """Representation of a Audi sensor."""
 
-    def __init__(self, coordinator, vin, attr):
+    def __init__(self, coordinator, vin, uid):
         """Initialize."""
-        super().__init__(coordinator, vin)
-        entity = coordinator.data[vin].states[attr]
-        self._attribute = attr
-        self._attr_name = self.format_name(attr)
-        self._attr_unique_id = f"{vin}_{attr}"
-        self._attr_unit_of_measurement = entity.get("unit")
-        self._attr_icon = entity.get(ATTR_ICON)
-        self._attr_device_class = entity.get(ATTR_DEVICE_CLASS)
+        super().__init__(coordinator, vin, uid)
 
     @property
     def state(self):
         """Return sensor state."""
-        return self.coordinator.data[self._unique_id].states[self._attribute]["value"]
+        return self.coordinator.data[self.vin].states[self.uid]["value"]

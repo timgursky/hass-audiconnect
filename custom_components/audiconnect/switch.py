@@ -3,7 +3,6 @@ import logging
 
 from homeassistant.components.switch import DOMAIN as domain_sensor, ToggleEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_DEVICE_CLASS, ATTR_ICON
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -32,27 +31,20 @@ async def async_setup_entry(
 class AudiSwitch(AudiEntity, ToggleEntity):
     """Representation of a Audi switch."""
 
-    def __init__(self, coordinator, vin, attribute):
+    def __init__(self, coordinator, vin, uid):
         """Initialize."""
-        super().__init__(coordinator, vin)
-        self._entity = coordinator.data[vin].states[attribute]
-        self._attribute = attribute
-        self._attr_name = self.format_name(attribute)
-        self._attr_unique_id = f"{vin}_{attribute}"
-        self._attr_unit_of_measurement = self._entity.get("unit")
-        self._attr_icon = self._entity.get(ATTR_ICON)
-        self._attr_device_class = self._entity.get(ATTR_DEVICE_CLASS)
+        super().__init__(coordinator, vin, uid)
 
     @property
     def is_on(self):
         """Return sensor state."""
-        return self.coordinator.data[self._unique_id].states[self._attribute]["value"]
+        return self.coordinator.data[self.vin].states[self.uid]["value"]
 
     async def async_turn_on(self):
         """Turn the switch on."""
         try:
-            await getattr(self.coordinator.api, self._entity["turn_mode"])(
-                self._unique_id, True
+            await getattr(self.coordinator.api, self.entity["turn_mode"])(
+                self.vin, True
             )
             await self.coordinator.async_request_refresh()
         except AudiException as error:
@@ -61,8 +53,8 @@ class AudiSwitch(AudiEntity, ToggleEntity):
     async def async_turn_off(self):
         """Turn the switch off."""
         try:
-            await getattr(self.coordinator.api, self._entity["turn_mode"])(
-                self._unique_id, False
+            await getattr(self.coordinator.api, self.entity["turn_mode"])(
+                self.vin, False
             )
             await self.coordinator.async_request_refresh()
         except AudiException as error:
