@@ -10,9 +10,9 @@ refresh_data:
         device:
           integration: audiconnect
 
-execute_vehicle_action:
-  name: Execute action
-  description: Execute action to vehicle
+turn_on_action:
+  name: Turn on
+  description: Turn on action
   fields:
     vin:
       name: Device
@@ -27,15 +27,37 @@ execute_vehicle_action:
       name: Action
       selector:
         select:
+          translation_key: select_mode
           options:
-            - "lock"
-            - "unlock"
-            - "start_climatisation"
-            - "stop_climatisation"
-            - "start_charger"
-            - "start_timed_charger"
-            - "stop_charger"
-            - "start_preheater"
-            - "stop_preheater"
-            - "start_window_heating"
-            - "stop_window_heating"
+            - lock
+            - climater
+            - charger
+            - pre_heating
+            - window_heating
+            - ventilation
+
+turn_off_action:
+  name: Turn off
+  description: Turn off action
+  fields:
+    vin:
+      name: Device
+      description: Set VIN code
+      required: true
+      selector:
+        device:
+          integration: audiconnect  
+    action:
+      required: true
+      description: service
+      name: Action
+      selector:
+        select:
+          translation_key: select_mode
+          options:
+            - lock
+            - climater
+            - charger
+            - pre_heating
+            - window_heating
+            - ventilation

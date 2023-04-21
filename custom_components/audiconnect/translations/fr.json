@@ -20,5 +20,17 @@
                 }
             }
         }        
-    }  
+    }, 
+    "selector": {
+        "select_mode": {
+          "options": {
+            "lock": "Verrouillage",
+            "climater": "Climatisation",
+            "charger": "Chargement",
+            "pre_heating": "Préchauffage",
+            "window_heating": "Dégivrage",
+            "ventilation": "Ventilation"
+          }
+        }
+    }        
 }
