@@ -1,7 +1,7 @@
 """Support for Audi Connect switches."""
 import logging
 
-from homeassistant.components.switch import DOMAIN as domain_sensor, ToggleEntity
+from homeassistant.components.switch import DOMAIN as domain_sensor, SwitchEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -28,7 +28,7 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class AudiSwitch(AudiEntity, ToggleEntity):
+class AudiSwitch(AudiEntity, SwitchEntity):
     """Representation of a Audi switch."""
 
     def __init__(self, coordinator, vin, uid):
@@ -38,12 +38,12 @@ class AudiSwitch(AudiEntity, ToggleEntity):
     @property
     def is_on(self):
         """Return sensor state."""
-        return self.coordinator.data[self.vin].states[self.uid]["value"]
+        return self.coordinator.data[self.vin].states[self.uid].get("value")
 
     async def async_turn_on(self):
         """Turn the switch on."""
         try:
-            await getattr(self.coordinator.api, self.entity["turn_mode"])(
+            await getattr(self.coordinator.api.services, self.entity["turn_mode"])(
                 self.vin, True
             )
             await self.coordinator.async_request_refresh()
@@ -53,7 +53,7 @@ class AudiSwitch(AudiEntity, ToggleEntity):
     async def async_turn_off(self):
         """Turn the switch off."""
         try:
-            await getattr(self.coordinator.api, self.entity["turn_mode"])(
+            await getattr(self.coordinator.api.services, self.entity["turn_mode"])(
                 self.vin, False
             )
             await self.coordinator.async_request_refresh()

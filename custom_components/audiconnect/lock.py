@@ -38,12 +38,15 @@ class AudiLock(AudiEntity, LockEntity):
     @property
     def is_locked(self):
         """Return lock status."""
-        return self.coordinator.data[self.vin].states[self.uid]["value"] is False
+        return (
+            self.coordinator.data[self.vin].states[self.uid].get("value", False)
+            is False
+        )
 
     async def async_lock(self):
         """Lock the car."""
         try:
-            await getattr(self.coordinator.api, self.entity["turn_mode"])(
+            await getattr(self.coordinator.api.services, self.entity["turn_mode"])(
                 self.vin, True
             )
             await self.coordinator.async_request_refresh()
@@ -53,7 +56,7 @@ class AudiLock(AudiEntity, LockEntity):
     async def async_unlock(self):
         """Unlock the car."""
         try:
-            await getattr(self.coordinator.api, self.entity["turn_mode"])(
+            await getattr(self.coordinator.api.services, self.entity["turn_mode"])(
                 self.vin, False
             )
             await self.coordinator.async_request_refresh()
