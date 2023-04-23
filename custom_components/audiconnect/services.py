@@ -36,7 +36,7 @@ async def async_setup_services(
         device_id = call.data.get(CONF_VIN).lower()
         device = dr.async_get(hass).async_get(device_id)
         vin = dict(device.identifiers).get(DOMAIN)
-        await coordinator.api.async_refresh_vehicle_data(vin)
+        await coordinator.api.services.async_refresh_vehicle_data(vin)
         await coordinator.async_request_refresh()
 
     async def async_turn_off_action(call: ServiceCall) -> None:
@@ -59,17 +59,17 @@ async def async_setup_services(
         """Execute action."""
         match action:
             case "lock":
-                await coordinator.api.async_switch_lock(vin, mode)
+                await coordinator.api.services.async_lock(vin, mode)
             case "climater":
-                await coordinator.api.async_switch_climater(vin, mode)
+                await coordinator.api.services.async_climater(vin, mode)
             case "charger":
-                await coordinator.api.async_switch_charger(vin, mode)
+                await coordinator.api.services.async_charger(vin, mode)
             case "pre_heating":
-                await coordinator.api.async_switch_pre_heating(vin, mode)
+                await coordinator.api.services.async_pre_heating(vin, mode)
             case "window_heating":
-                await coordinator.api.async_switch_window_heating(vin, mode)
+                await coordinator.api.services.async_window_heating(vin, mode)
             case "ventilation":
-                await coordinator.api.async_switch_ventilation(vin, mode)
+                await coordinator.api.services.async_ventilation(vin, mode)
 
         await coordinator.async_request_refresh()
 
