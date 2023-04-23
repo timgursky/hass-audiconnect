@@ -11,7 +11,7 @@ from homeassistant.const import CONF_PASSWORD, CONF_PIN, CONF_USERNAME
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
-from .audiconnectpy import AudiConnect, AudiException, AuthorizationError
+from audiconnectpy import AudiConnect, AudiException, AuthorizationError
 from .const import CONF_COUNTRY, COUNTRY_CODE, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)

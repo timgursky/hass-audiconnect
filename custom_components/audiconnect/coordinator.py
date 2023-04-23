@@ -11,7 +11,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .audiconnectpy import AudiConnect, AudiException
+from audiconnectpy import AudiConnect, AudiException
 from .const import CONF_COUNTRY, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)

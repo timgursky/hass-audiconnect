@@ -37,5 +37,4 @@ class AudiSensor(AudiEntity, SensorEntity):
     @property
     def state(self):
         """Return sensor state."""
-        _LOGGER.debug("State %s", self.uid)
         return self.coordinator.data[self.vin].states[self.uid].get("value")
