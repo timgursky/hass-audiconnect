@@ -41,6 +41,6 @@ class AudiEntity(CoordinatorEntity[AudiDataUpdateCoordinator], Entity):
             "csid": vehicle.csid,
             "vin": vin,
         }
-        self._attr_unit_of_measurement = self.entity.get(ATTR_UNIT_OF_MEASUREMENT)
+        self._attr_native_unit_of_measurement = self.entity.get(ATTR_UNIT_OF_MEASUREMENT)
         self._attr_icon = self.entity.get(ATTR_ICON)
         self._attr_device_class = self.entity.get(ATTR_DEVICE_CLASS)
