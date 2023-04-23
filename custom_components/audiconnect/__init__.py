@@ -18,7 +18,7 @@ PLATFORMS: list[Platform] = [
     Platform.SWITCH,
     Platform.LOCK,
     Platform.SELECT,
-    Platform.TEXT,
+    Platform.NUMBER,
 ]
 
 

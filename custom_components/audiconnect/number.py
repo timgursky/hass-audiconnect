@@ -1,7 +1,7 @@
 """Support for Audi Connect switches."""
 import logging
 
-from homeassistant.components.text import DOMAIN as domain_sensor, TextEntity
+from homeassistant.components.number import DOMAIN as domain_sensor, NumberEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -28,7 +28,7 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class AudiText(AudiEntity, TextEntity):
+class AudiText(AudiEntity, NumberEntity):
     """Representation of a Audi switch."""
 
     def __init__(self, coordinator, vin, uid):
@@ -36,23 +36,28 @@ class AudiText(AudiEntity, TextEntity):
         super().__init__(coordinator, vin, uid)
 
     @property
-    def native_value(self):
+    def mode(self) -> str:
+        """Mode."""
+        return "box"
+
+    @property
+    def native_value(self) -> float:
         """Native value."""
         return self.coordinator.data[self.vin].states[self.uid].get("value")
 
     @property
-    def native_min(self):
+    def native_min_value(self) -> float:
         """Native min."""
-        option = self.coordinator.data[self.vin].states[self.uid].get("options", [0])
+        option = self.coordinator.data[self.vin].states[self.uid].get("options")
         return option[0]
 
     @property
-    def native_max(self):
+    def native_max_value(self) -> float:
         """Native max."""
-        option = self.coordinator.data[self.vin].states[self.uid].get("options", [100])
-        return option[0]
+        option = self.coordinator.data[self.vin].states[self.uid].get("options")
+        return option[1]
 
-    async def async_set_value(self, value: str) -> None:
+    async def async_set_native_value(self, value: float) -> None:
         """Set the text value."""
         try:
             await getattr(self.coordinator.api.services, self.entity["turn_mode"])(
