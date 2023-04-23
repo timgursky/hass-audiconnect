@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 
+from audiconnectpy import AudiException
 import voluptuous as vol
 
 from homeassistant.core import HomeAssistant, ServiceCall
@@ -57,21 +58,24 @@ async def async_setup_services(
 
     async def async_actions(vin: str, action: str, mode: bool):
         """Execute action."""
-        match action:
-            case "lock":
-                await coordinator.api.services.async_lock(vin, mode)
-            case "climater":
-                await coordinator.api.services.async_climater(vin, mode)
-            case "charger":
-                await coordinator.api.services.async_charger(vin, mode)
-            case "pre_heating":
-                await coordinator.api.services.async_pre_heating(vin, mode)
-            case "window_heating":
-                await coordinator.api.services.async_window_heating(vin, mode)
-            case "ventilation":
-                await coordinator.api.services.async_ventilation(vin, mode)
-
-        await coordinator.async_request_refresh()
+        try:
+            match action:
+                case "lock":
+                    await coordinator.api.services.async_lock(vin, mode)
+                case "climater":
+                    await coordinator.api.services.async_climater(vin, mode)
+                case "charger":
+                    await coordinator.api.services.async_charger(vin, mode)
+                case "pre_heating":
+                    await coordinator.api.services.async_pre_heating(vin, mode)
+                case "window_heating":
+                    await coordinator.api.services.async_window_heating(vin, mode)
+                case "ventilation":
+                    await coordinator.api.services.async_ventilation(vin, mode)
+        except AudiException as error:
+            _LOGGER.error(error)
+        else:
+            await coordinator.async_request_refresh()
 
     hass.services.async_register(
         DOMAIN, SERVICE_REFRESH_DATA, async_refresh_data, schema=SCHEMA_REFRESH_DATA
