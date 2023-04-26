@@ -31,10 +31,6 @@ async def async_setup_entry(
 class AudiSwitch(AudiEntity, SwitchEntity):
     """Representation of a Audi switch."""
 
-    def __init__(self, coordinator, vin, uid):
-        """Initialize."""
-        super().__init__(coordinator, vin, uid)
-
     @property
     def is_on(self):
         """Return sensor state."""

@@ -11,10 +11,13 @@ from homeassistant.core import HomeAssistant
 from .const import DOMAIN
 
 TO_REDACT = {
+    "address",
     "api_key",
+    "city",
     "country",
     "csid",
     "deviceId",
+    "email",
     "encryption_password",
     "encryption_salt",
     "host",
@@ -25,7 +28,9 @@ TO_REDACT = {
     "latitude",
     "lon",
     "longitude",
+    "mappingVin"
     "password",
+    "phone",
     "pin",
     "requestId",
     "serial",
@@ -33,12 +38,6 @@ TO_REDACT = {
     "userId",
     "username",
     "vin",
-    "email",
-    "address",
-    "city",
-    "country",
-    "phone",
-    "mappingVin"
 }
 
 
@@ -50,7 +49,7 @@ async def async_get_config_entry_diagnostics(
     services = coordinator.api.services
     _datas = {}
 
-    async def exec(func: Callable[..., Any], *args: Any) -> None:
+    async def diag(func: Callable[..., Any], *args: Any) -> None:
         rslt = {}
         with suppress(Exception):
             rsp = await func(*args)
@@ -66,27 +65,27 @@ async def async_get_config_entry_diagnostics(
     for k, v in coordinator.data.items():
         i += 1
         _datas.update({i: vars(v)})
-        await exec(services.async_get_vehicle_details, k)
-        await exec(services.async_get_vehicle, k)
-        await exec(services.async_get_stored_position, k)
-        await exec(services.async_get_destinations, k)
-        await exec(services.async_get_history, k)
-        await exec(services.async_get_vehicule_users, k)
-        await exec(services.async_get_charger, k)
-        await exec(services.async_get_tripdata, k, "cyclic")
-        await exec(services.async_get_tripdata, k, "longTerm")
-        await exec(services.async_get_tripdata, k, "shortTerm")
-        await exec(services.async_get_operations_list, k)
-        await exec(services.async_get_climater, k)
-        await exec(services.async_get_preheater, k)
-        await exec(services.async_get_climater_timer, k)
-        await exec(services.async_get_capabilities, k)
-        await exec(services.async_get_vehicle_information)
-        await exec(services.async_get_honkflash, k)
-        await exec(services.async_get_fences, k)
-        await exec(services.async_get_fences_config, k)
-        await exec(services.async_get_speed_alert, k)
-        await exec(services.async_get_speed_config, k)
+        await diag(services.async_get_vehicle_details, k)
+        await diag(services.async_get_vehicle, k)
+        await diag(services.async_get_stored_position, k)
+        await diag(services.async_get_destinations, k)
+        await diag(services.async_get_history, k)
+        await diag(services.async_get_vehicule_users, k)
+        await diag(services.async_get_charger, k)
+        await diag(services.async_get_tripdata, k, "cyclic")
+        await diag(services.async_get_tripdata, k, "longTerm")
+        await diag(services.async_get_tripdata, k, "shortTerm")
+        await diag(services.async_get_operations_list, k)
+        await diag(services.async_get_climater, k)
+        await diag(services.async_get_preheater, k)
+        await diag(services.async_get_climater_timer, k)
+        await diag(services.async_get_capabilities, k)
+        await diag(services.async_get_vehicle_information)
+        await diag(services.async_get_honkflash, k)
+        await diag(services.async_get_fences, k)
+        await diag(services.async_get_fences_config, k)
+        await diag(services.async_get_speed_alert, k)
+        await diag(services.async_get_speed_config, k)
 
     return {
         "entry": {

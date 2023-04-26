@@ -31,10 +31,6 @@ async def async_setup_entry(
 class AudiDeviceTracker(AudiEntity, TrackerEntity):
     """Represent a tracked device."""
 
-    def __init__(self, coordinator, vin, uid):
-        """Set up Locative entity."""
-        super().__init__(coordinator, vin, uid)
-
     @property
     def latitude(self):
         """Return latitude value of the device."""

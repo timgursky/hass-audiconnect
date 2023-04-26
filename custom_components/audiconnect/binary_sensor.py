@@ -33,10 +33,6 @@ async def async_setup_entry(
 class AudiSensor(AudiEntity, BinarySensorEntity):
     """Representation of an Audi sensor."""
 
-    def __init__(self, coordinator, vin, uid):
-        """Initialize."""
-        super().__init__(coordinator, vin, uid)
-
     @property
     def is_on(self):
         """Return is on."""

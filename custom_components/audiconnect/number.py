@@ -31,10 +31,6 @@ async def async_setup_entry(
 class AudiText(AudiEntity, NumberEntity):
     """Representation of a Audi switch."""
 
-    def __init__(self, coordinator, vin, uid):
-        """Initialize."""
-        super().__init__(coordinator, vin, uid)
-
     @property
     def mode(self) -> str:
         """Mode."""

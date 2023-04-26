@@ -53,7 +53,9 @@ async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry):
 
 
 async def async_remove_config_entry_device(
-    hass: HomeAssistant, config_entry: ConfigEntry, device_entry: dr.DeviceEntry
+    hass: HomeAssistant,  # pylint: disable=unused-argument
+    config_entry: ConfigEntry,  # pylint: disable=unused-argument
+    device_entry: dr.DeviceEntry,  # pylint: disable=unused-argument
 ) -> bool:
     """Remove config entry from a device."""
     return True

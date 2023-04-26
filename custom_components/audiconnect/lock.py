@@ -31,10 +31,6 @@ async def async_setup_entry(
 class AudiLock(AudiEntity, LockEntity):
     """Represents a car lock."""
 
-    def __init__(self, coordinator, vin, uid):
-        """Initialize."""
-        super().__init__(coordinator, vin, uid)
-
     @property
     def is_locked(self):
         """Return lock status."""
