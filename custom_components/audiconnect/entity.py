@@ -1,12 +1,22 @@
 """Audi entity vehicle."""
+from __future__ import annotations
+
 import logging
 
-from homeassistant.const import ATTR_DEVICE_CLASS, ATTR_ICON, ATTR_UNIT_OF_MEASUREMENT
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, MANUFACTURER, URL_WEBSITE
 from .coordinator import AudiDataUpdateCoordinator
+from .helpers import (
+    AudiSensorDescription,
+    AudiSwitchDescription,
+    AudiBinarySensorDescription,
+    AudiNumberDescription,
+    AudiSelectDescription,
+    AudiLockDescription,
+    AudiTrackerDescription,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,16 +27,26 @@ class AudiEntity(CoordinatorEntity[AudiDataUpdateCoordinator], Entity):
     _attr_has_entity_name = True
 
     def __init__(
-        self, coordinator: AudiDataUpdateCoordinator, vin: str, uid: str
+        self,
+        coordinator: AudiDataUpdateCoordinator,
+        vin: str,
+        description: AudiBinarySensorDescription
+        | AudiLockDescription
+        | AudiNumberDescription
+        | AudiSelectDescription
+        | AudiSwitchDescription
+        | AudiSensorDescription
+        | AudiTrackerDescription,
     ) -> None:
         """Initialize the entity."""
         super().__init__(coordinator)
         vehicle = coordinator.data[vin]
-        self.entity = vehicle.states[uid]
+        self.entity = vehicle.states[description.key]
+        self.entity_description = description
         self.vin = vin
-        self.uid = uid
-        self._attr_unique_id = f"{vin}_{uid}"
-        self._attr_name = uid.capitalize().replace("_", " ")
+        self.uid = description.key
+        self._attr_unique_id = f"{vin}_{description.key}"
+        self._attr_name = description.key.capitalize().replace("_", " ")
         self._attr_device_info = {
             "identifiers": {(DOMAIN, vin)},
             "manufacturer": MANUFACTURER,
@@ -41,6 +61,3 @@ class AudiEntity(CoordinatorEntity[AudiDataUpdateCoordinator], Entity):
             "csid": vehicle.csid,
             "vin": vin,
         }
-        self._attr_native_unit_of_measurement = self.entity.get(ATTR_UNIT_OF_MEASUREMENT)
-        self._attr_icon = self.entity.get(ATTR_ICON)
-        self._attr_device_class = self.entity.get(ATTR_DEVICE_CLASS)

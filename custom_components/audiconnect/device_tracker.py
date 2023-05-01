@@ -1,7 +1,9 @@
 """Support for tracking an Audi."""
+from __future__ import annotations
+
 import logging
 
-from homeassistant.components.device_tracker import DOMAIN as domain_sensor, SourceType
+from homeassistant.components.device_tracker import SourceType
 from homeassistant.components.device_tracker.config_entry import TrackerEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -9,8 +11,15 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN
 from .entity import AudiEntity
+from .helpers import AudiTrackerDescription
 
 _LOGGER = logging.getLogger(__name__)
+
+SENSOR_TYPES: tuple[AudiTrackerDescription, ...] = (
+    AudiTrackerDescription(
+        key="position",
+    ),
+)
 
 
 async def async_setup_entry(
@@ -22,8 +31,9 @@ async def async_setup_entry(
     entities = []
     for vin, vehicle in coordinator.data.items():
         for name, data in vehicle.states.items():
-            if data.get("sensor_type") == domain_sensor:
-                entities.append(AudiDeviceTracker(coordinator, vin, name))
+            for description in SENSOR_TYPES:
+                if description.key == name:
+                    entities.append(AudiDeviceTracker(coordinator, vin, description))
 
     async_add_entities(entities)
 
@@ -34,12 +44,12 @@ class AudiDeviceTracker(AudiEntity, TrackerEntity):
     @property
     def latitude(self):
         """Return latitude value of the device."""
-        return self.coordinator.data[self.vin].states[self.uid]["value"]["latitude"]
+        return self.coordinator.data[self.vin].states[self.uid]["latitude"]
 
     @property
     def longitude(self):
         """Return longitude value of the device."""
-        return self.coordinator.data[self.vin].states[self.uid]["value"]["longitude"]
+        return self.coordinator.data[self.vin].states[self.uid]["longitude"]
 
     @property
     def source_type(self):
@@ -49,8 +59,5 @@ class AudiDeviceTracker(AudiEntity, TrackerEntity):
     @property
     def extra_state_attributes(self):
         """Return extra attributes."""
-        value = self.coordinator.data[self.vin].states[self.uid]["value"]
-        return {
-            "timestamp": value["timestamp"],
-            "parktime": value["parktime"],
-        }
+        attr = self.coordinator.data[self.vin].states[self.uid]
+        return {"timestamp": attr["timestamp"], "parktime": attr["parktime"]}

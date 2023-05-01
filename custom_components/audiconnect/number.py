@@ -1,7 +1,9 @@
 """Support for Audi Connect switches."""
+from __future__ import annotations
+
 import logging
 
-from homeassistant.components.number import DOMAIN as domain_sensor, NumberEntity
+from homeassistant.components.number import NumberEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -9,8 +11,30 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from audiconnectpy import AudiException
 from .const import DOMAIN
 from .entity import AudiEntity
+from .helpers import AudiNumberDescription
 
 _LOGGER = logging.getLogger(__name__)
+
+SENSOR_TYPES: tuple[AudiNumberDescription, ...] = (
+    AudiNumberDescription(
+        icon="mdi:current-ac",
+        native_unit_of_measurement="A",
+        key="max_charge_current",
+        turn_mode="async_set_charger_max",
+        max_value=32,
+        min_value=0,
+    ),
+    AudiNumberDescription(
+        icon="mdi:temperature-celsius",
+        native_unit_of_measurement="°C",
+        key="climatisation_target_temp",
+        turn_mode="async_climater_temp",
+        value_fn=lambda x: round((int(x) - 2731) / 10, 1),
+        device_class="temperature",
+        max_value=40,
+        min_value=7,
+    ),
+)
 
 
 async def async_setup_entry(
@@ -22,13 +46,14 @@ async def async_setup_entry(
     entities = []
     for vin, vehicle in coordinator.data.items():
         for name, data in vehicle.states.items():
-            if data.get("sensor_type") == domain_sensor:
-                entities.append(AudiText(coordinator, vin, name))
+            for description in SENSOR_TYPES:
+                if description.key == name:
+                    entities.append(AudiNumber(coordinator, vin, description))
 
     async_add_entities(entities)
 
 
-class AudiText(AudiEntity, NumberEntity):
+class AudiNumber(AudiEntity, NumberEntity):
     """Representation of a Audi switch."""
 
     @property
@@ -39,26 +64,17 @@ class AudiText(AudiEntity, NumberEntity):
     @property
     def native_value(self) -> float:
         """Native value."""
-        return self.coordinator.data[self.vin].states[self.uid].get("value")
-
-    @property
-    def native_min_value(self) -> float:
-        """Native min."""
-        option = self.coordinator.data[self.vin].states[self.uid].get("options")
-        return option[0]
-
-    @property
-    def native_max_value(self) -> float:
-        """Native max."""
-        option = self.coordinator.data[self.vin].states[self.uid].get("options")
-        return option[1]
+        value = self.coordinator.data[self.vin].states.get(self.uid)
+        if value and self.entity_description.value_fn:
+            return self.entity_description.value_fn(value)
+        return value
 
     async def async_set_native_value(self, value: float) -> None:
         """Set the text value."""
         try:
-            await getattr(self.coordinator.api.services, self.entity["turn_mode"])(
-                self.vin, value
-            )
+            await getattr(
+                self.coordinator.api.services, self.entity_description.turn_mode
+            )(self.vin, value)
             await self.coordinator.async_request_refresh()
         except AudiException as error:
             _LOGGER.error("Error to set value: %s", error)

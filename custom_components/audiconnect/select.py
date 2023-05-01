@@ -1,7 +1,9 @@
 """Support for Audi Connect switches."""
+from __future__ import annotations
+
 import logging
 
-from homeassistant.components.select import DOMAIN as domain_sensor, SelectEntity
+from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -9,8 +11,19 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from audiconnectpy import AudiException
 from .const import DOMAIN
 from .entity import AudiEntity
+from .helpers import AudiSelectDescription
+
 
 _LOGGER = logging.getLogger(__name__)
+
+SENSOR_TYPES: tuple[AudiSelectDescription, ...] = (
+    AudiSelectDescription(
+        key="climatisation_heater_src",
+        icon="mdi:air-conditioner",
+        turn_mode="set_heater_source",
+        options=["electric", "auxiliary", "automatic"],
+    ),
+)
 
 
 async def async_setup_entry(
@@ -22,8 +35,9 @@ async def async_setup_entry(
     entities = []
     for vin, vehicle in coordinator.data.items():
         for name, data in vehicle.states.items():
-            if data.get("sensor_type") == domain_sensor:
-                entities.append(AudiSelect(coordinator, vin, name))
+            for description in SENSOR_TYPES:
+                if description.key == name:
+                    entities.append(AudiSelect(coordinator, vin, description))
 
     async_add_entities(entities)
 
@@ -34,19 +48,17 @@ class AudiSelect(AudiEntity, SelectEntity):
     @property
     def current_option(self):
         """Return sensor state."""
-        return self.coordinator.data[self.vin].states[self.uid].get("value")
-
-    @property
-    def options(self):
-        """Options list."""
-        return self.coordinator.data[self.vin].states[self.uid].get("options", [])
+        value = self.coordinator.data[self.vin].states.get(self.uid)
+        if value and self.entity_description.value_fn:
+            return self.entity_description.value_fn(value)
+        return value
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
         try:
-            await getattr(self.coordinator.api.services, self.entity["turn_mode"])(
-                self.vin, option
-            )
+            await getattr(
+                self.coordinator.api.services, self.entity_description.turn_mode
+            )(self.vin, option)
             await self.coordinator.async_request_refresh()
         except AudiException as error:
             _LOGGER.error("Error to selected option: %s", error)
