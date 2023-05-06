@@ -18,7 +18,10 @@ _LOGGER = logging.getLogger(__name__)
 
 SENSOR_TYPES: tuple[AudiLockDescription, ...] = (
     AudiLockDescription(
-        key="any_door_unlocked", device_class="lock", turn_mode="async_lock"
+        key="any_door_unlocked",
+        device_class="lock",
+        turn_mode="async_lock",
+        translation_key="any_door_unlocked"
     ),
 )
 

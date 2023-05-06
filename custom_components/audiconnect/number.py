@@ -23,6 +23,7 @@ SENSOR_TYPES: tuple[AudiNumberDescription, ...] = (
         turn_mode="async_set_charger_max",
         max_value=32,
         min_value=0,
+        translation_key="max_charge_current"
     ),
     AudiNumberDescription(
         icon="mdi:temperature-celsius",
@@ -33,6 +34,7 @@ SENSOR_TYPES: tuple[AudiNumberDescription, ...] = (
         device_class="temperature",
         max_value=40,
         min_value=7,
+        translation_key="climatisation_target_temp"
     ),
 )
 

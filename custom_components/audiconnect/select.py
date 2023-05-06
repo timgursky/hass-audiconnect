@@ -22,6 +22,7 @@ SENSOR_TYPES: tuple[AudiSelectDescription, ...] = (
         icon="mdi:air-conditioner",
         turn_mode="set_heater_source",
         options=["electric", "auxiliary", "automatic"],
+        translation_key="climatisation_heater_src"
     ),
 )
 
