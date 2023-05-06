@@ -28,7 +28,7 @@ TO_REDACT = {
     "latitude",
     "lon",
     "longitude",
-    "mappingVin"
+    "mappingVin",
     "password",
     "phone",
     "pin",
