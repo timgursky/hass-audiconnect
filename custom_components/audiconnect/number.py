@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 
-from homeassistant.components.number import NumberEntity
+from homeassistant.components.number import NumberEntity, NumberDeviceClass as dc
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -23,7 +23,8 @@ SENSOR_TYPES: tuple[AudiNumberDescription, ...] = (
         turn_mode="async_set_charger_max",
         max_value=32,
         min_value=0,
-        translation_key="max_charge_current"
+        translation_key="max_charge_current",
+        device_class=dc.CURRENT
     ),
     AudiNumberDescription(
         icon="mdi:temperature-celsius",
@@ -31,7 +32,7 @@ SENSOR_TYPES: tuple[AudiNumberDescription, ...] = (
         key="climatisation_target_temp",
         turn_mode="async_climater_temp",
         value_fn=lambda x: round((int(x) - 2731) / 10, 1),
-        device_class="temperature",
+        device_class=dc.TEMPERATURE,
         max_value=40,
         min_value=7,
         translation_key="climatisation_target_temp"

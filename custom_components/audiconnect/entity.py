@@ -42,11 +42,11 @@ class AudiEntity(CoordinatorEntity[AudiDataUpdateCoordinator], Entity):
         super().__init__(coordinator)
         vehicle = coordinator.data[vin]
         self.entity = vehicle.states[description.key]
-        self.entity_description = description
         self.vin = vin
         self.uid = description.key
         self._attr_unique_id = f"{vin}_{description.key}"
         self._attr_name = description.key.capitalize().replace("_", " ")
+        self.entity_description = description
         self._attr_device_info = {
             "identifiers": {(DOMAIN, vin)},
             "manufacturer": MANUFACTURER,

@@ -4,8 +4,8 @@ from __future__ import annotations
 import logging
 
 from audiconnectpy import AudiException
-
 from homeassistant.components.lock import LockEntity
+from homeassistant.components.binary_sensor import BinarySensorDeviceClass as dc
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -19,7 +19,7 @@ _LOGGER = logging.getLogger(__name__)
 SENSOR_TYPES: tuple[AudiLockDescription, ...] = (
     AudiLockDescription(
         key="any_door_unlocked",
-        device_class="lock",
+        device_class=dc.LOCK,
         turn_mode="async_lock",
         translation_key="any_door_unlocked"
     ),
