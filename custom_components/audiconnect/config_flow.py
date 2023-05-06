@@ -48,7 +48,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     user_input[CONF_COUNTRY],
                     user_input.get(CONF_PIN),
                 )
-                if await connection.async_login(ntries=1) is False:
+                if await connection.async_login() is False:
                     raise AuthorizationError(
                         "Unexpected error communicating with the Audi server"
                     )
