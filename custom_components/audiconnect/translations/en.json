@@ -1,24 +1,24 @@
 {
     "config": {
-        "abort": {
-            "already_configured": "Device is already exist"
-        },
-        "error": {
-            "cannot_connect": "Can not connect",
-            "invalid_auth": "Invalid authentication",
-            "unknown": "Unknown error"
-        },
-        "flow_title": "{name}",        
+        "title": "Audi Connect",
         "step": {
             "user": {
                 "title": "Register your account",
                 "data": {
                     "username": "Email",
                     "password": "Password",
-                    "country": "Country code",
+                    "country": "country code",
                     "pin": "Pin code"
                 }
             }
+        },
+        "error": {
+            "cannot_connect": "Can't connect to API.",
+            "invalid_auth": "Invalid username password combination",
+            "unknown": "unknown error."
+        },
+        "abort": {
+            "already_configured": "Service is already configured"
         }
     },
     "selector": {
@@ -32,5 +32,5 @@
             "ventilation": "Ventilation"
           }
         }
-    }       
+    }    
 }

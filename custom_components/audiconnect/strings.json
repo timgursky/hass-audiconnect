@@ -1,6 +1,6 @@
 {
     "config": {
-        "flow_title": "{name}",
+        "title": "Audi Connect",
         "step": {
             "user": {
                 "title": "Register your account",
