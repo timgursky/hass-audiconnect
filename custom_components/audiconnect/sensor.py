@@ -24,6 +24,11 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         translation_key="last_access",
     ),
     AudiSensorDescription(
+        icon="mdi:air-conditioner",
+        key="climatisation_state",
+        translation_key="climatisation_state",
+    ),
+    AudiSensorDescription(
         icon="mdi:update",
         key="last_update_time",
         device_class=dc.TIMESTAMP,
