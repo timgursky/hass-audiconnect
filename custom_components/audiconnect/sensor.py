@@ -46,10 +46,11 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         translation_key="maintenance_interval_distance_to_oil_change",
     ),
     AudiSensorDescription(
-        icon="mdi:speedometer",
-        native_unit_of_measurement="km",
+        icon="mdi:temperature-celsius",
+        native_unit_of_measurement="°C",
         key="climatisation_target_temp",
-        device_class=dc.DISTANCE,
+        value_fn=lambda x: round((int(x) - 2730) / 10, 1),
+        device_class=dc.TEMPERATURE,
         translation_key="climatisation_target_temp",
     ),
     AudiSensorDescription(
