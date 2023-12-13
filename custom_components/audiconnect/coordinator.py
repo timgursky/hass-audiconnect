@@ -16,7 +16,7 @@ from .const import CONF_COUNTRY, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-SCAN_INTERVAL = 5
+SCAN_INTERVAL = 30
 
 
 class AudiDataUpdateCoordinator(DataUpdateCoordinator):
