@@ -1,8 +1,12 @@
 """Support for Audi Connect sensors."""
 from __future__ import annotations
+
 import logging
 
-from homeassistant.components.binary_sensor import BinarySensorEntity , BinarySensorDeviceClass as dc
+from homeassistant.components.binary_sensor import (
+    BinarySensorDeviceClass as dc,
+    BinarySensorEntity,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -268,7 +272,7 @@ async def async_setup_entry(
 
     entities = []
     for vin, vehicle in coordinator.data.items():
-        for name, data in vehicle.states.items():
+        for name in vehicle.states:
             for description in SENSOR_TYPES:
                 if description.key == name:
                     entities.append(AudiBinarySensor(coordinator, vin, description))
