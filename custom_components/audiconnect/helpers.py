@@ -3,13 +3,14 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from homeassistant.helpers.typing import StateType
-from homeassistant.components.sensor import SensorEntityDescription
+
 from homeassistant.components.binary_sensor import BinarySensorEntityDescription
-from homeassistant.components.select import SelectEntityDescription
-from homeassistant.components.number import NumberEntityDescription
-from homeassistant.components.switch import SwitchEntityDescription
 from homeassistant.components.lock import LockEntityDescription
+from homeassistant.components.number import NumberEntityDescription
+from homeassistant.components.select import SelectEntityDescription
+from homeassistant.components.sensor import SensorEntityDescription
+from homeassistant.components.switch import SwitchEntityDescription
+from homeassistant.helpers.typing import StateType
 
 
 @dataclass

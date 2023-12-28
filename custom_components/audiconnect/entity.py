@@ -9,12 +9,12 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN, MANUFACTURER, URL_WEBSITE
 from .coordinator import AudiDataUpdateCoordinator
 from .helpers import (
-    AudiSensorDescription,
-    AudiSwitchDescription,
     AudiBinarySensorDescription,
+    AudiLockDescription,
     AudiNumberDescription,
     AudiSelectDescription,
-    AudiLockDescription,
+    AudiSensorDescription,
+    AudiSwitchDescription,
     AudiTrackerDescription,
 )
 
