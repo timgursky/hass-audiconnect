@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 
-from homeassistant.components.sensor import SensorEntity, SensorDeviceClass as dc
+from homeassistant.components.sensor import SensorDeviceClass as dc, SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -28,6 +28,11 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         key="last_update_time",
         device_class=dc.TIMESTAMP,
         translation_key="last_update_time",
+    ),
+    AudiSensorDescription(
+        icon="mdi:ev-station",
+        key="charging_state",
+        translation_key="charging_state",
     ),
     AudiSensorDescription(
         icon="mdi:speedometer",
@@ -199,7 +204,7 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         key="remaining_charging_time",
         value_fn=lambda x: "n/a"
         if int(x) == 65535
-        else "{r[0]:02d}:{r[1]:02d}".format(r=divmod(x, 60)),
+        else f"{divmod(x, 60)[0]:02d}:{divmod(x, 60)[1]:02d}",
         native_unit_of_measurement="Min",
         device_class=dc.DURATION,
         translation_key="remaining_charging_time",
@@ -217,13 +222,14 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         key="doors_trunk_status",
         translation_key="doors_trunk_status",
     ),
-    # AudiSensorDescription(key="trip",translation_key="trip"),
-    # AudiSensorDescription(key="trip_short_reset",translation_key="trip_short_reset"),
-    # AudiSensorDescription(key="trip_short_current",translation_key="trip_short_current"),
-    # AudiSensorDescription(key="trip_long_reset",translation_key="trip_long_reset"),
-    # AudiSensorDescription(key="trip_long_current",translation_key="trip_long_current"),
-    # AudiSensorDescription(key="trip_cyclic_reset",translation_key="trip_cyclic_reset"),
-    # AudiSensorDescription(key="trip_cyclic_current",translation_key="trip_cyclic_current"),
+    AudiSensorDescription(key="trip", translation_key="trip"),
+    AudiSensorDescription(
+        key="support_trip_short", translation_key="support_trip_short"
+    ),
+    AudiSensorDescription(key="support_trip_long", translation_key="support_trip_long"),
+    AudiSensorDescription(
+        key="support_trip_cyclic", translation_key="support_trip_cyclic"
+    ),
 )
 
 
@@ -235,7 +241,7 @@ async def async_setup_entry(
 
     entities = []
     for vin, vehicle in coordinator.data.items():
-        for name, data in vehicle.states.items():
+        for name in vehicle.states:
             for description in SENSOR_TYPES:
                 if description.key == name:
                     entities.append(AudiSensor(coordinator, vin, description))

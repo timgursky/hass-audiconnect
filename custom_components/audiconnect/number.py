@@ -3,12 +3,13 @@ from __future__ import annotations
 
 import logging
 
-from homeassistant.components.number import NumberEntity, NumberDeviceClass as dc
+from audiconnectpy import AudiException
+
+from homeassistant.components.number import NumberDeviceClass as dc, NumberEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from audiconnectpy import AudiException
 from .const import DOMAIN
 from .entity import AudiEntity
 from .helpers import AudiNumberDescription
@@ -31,7 +32,7 @@ SENSOR_TYPES: tuple[AudiNumberDescription, ...] = (
         icon="mdi:temperature-celsius",
         native_unit_of_measurement="°C",
         key="climatisation_target_temp",
-        turn_mode="async_climater_temp",
+        turn_mode="async_set_climater_temp",
         value_fn=lambda x: round((int(x) - 2730) / 10, 1),
         device_class=dc.TEMPERATURE,
         native_max_value=40,
@@ -50,7 +51,7 @@ async def async_setup_entry(
 
     entities = []
     for vin, vehicle in coordinator.data.items():
-        for name, data in vehicle.states.items():
+        for name in vehicle.states:
             for description in SENSOR_TYPES:
                 if description.key == name:
                     entities.append(AudiNumber(coordinator, vin, description))
@@ -78,8 +79,9 @@ class AudiNumber(AudiEntity, NumberEntity):
         """Set the text value."""
         try:
             await getattr(
-                self.coordinator.api.services, self.entity_description.turn_mode
-            )(self.vin, value)
+                self.coordinator.api.vehicles.get(self.vin),
+                self.entity_description.turn_mode,
+            )(value)
             await self.coordinator.async_request_refresh()
         except AudiException as error:
             _LOGGER.error("Error to set value: %s", error)

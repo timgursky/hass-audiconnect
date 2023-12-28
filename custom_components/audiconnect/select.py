@@ -8,11 +8,9 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from audiconnectpy import AudiException
 from .const import DOMAIN
 from .entity import AudiEntity
 from .helpers import AudiSelectDescription
-
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -22,7 +20,7 @@ SENSOR_TYPES: tuple[AudiSelectDescription, ...] = (
         icon="mdi:air-conditioner",
         turn_mode="set_heater_source",
         options=["electric", "auxiliary", "automatic"],
-        translation_key="climatisation_heater_src"
+        translation_key="climatisation_heater_src",
     ),
 )
 
@@ -35,7 +33,7 @@ async def async_setup_entry(
 
     entities = []
     for vin, vehicle in coordinator.data.items():
-        for name, data in vehicle.states.items():
+        for name in vehicle.states:
             for description in SENSOR_TYPES:
                 if description.key == name:
                     entities.append(AudiSelect(coordinator, vin, description))
@@ -44,7 +42,7 @@ async def async_setup_entry(
 
 
 class AudiSelect(AudiEntity, SelectEntity):
-    """Representation of a Audi switch."""
+    """Representation of a Audi select."""
 
     @property
     def current_option(self):
@@ -53,13 +51,3 @@ class AudiSelect(AudiEntity, SelectEntity):
         if value and self.entity_description.value_fn:
             return self.entity_description.value_fn(value)
         return value
-
-    async def async_select_option(self, option: str) -> None:
-        """Change the selected option."""
-        try:
-            await getattr(
-                self.coordinator.api.services, self.entity_description.turn_mode
-            )(self.vin, option)
-            await self.coordinator.async_request_refresh()
-        except AudiException as error:
-            _LOGGER.error("Error to selected option: %s", error)

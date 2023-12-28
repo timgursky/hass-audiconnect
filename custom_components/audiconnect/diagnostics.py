@@ -1,8 +1,9 @@
 """Diagnostics support for Audi Connect."""
 from __future__ import annotations
 
+from collections.abc import Callable
 from contextlib import suppress
-from typing import Any, Callable
+from typing import Any
 
 from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.config_entries import ConfigEntry
@@ -38,6 +39,12 @@ TO_REDACT = {
     "userId",
     "username",
     "vin",
+    "firstName",
+    "lastName",
+    "dateOfBirth",
+    "nickname",
+    "placeOfBirth",
+    "carnetEnrollmentCountry",
 }
 
 
@@ -46,7 +53,6 @@ async def async_get_config_entry_diagnostics(
 ) -> dict[str, Any]:
     """Return diagnostics for a config entry."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    services = coordinator.api.services
     _datas = {}
 
     async def diag(func: Callable[..., Any], *args: Any) -> None:
@@ -62,30 +68,34 @@ async def async_get_config_entry_diagnostics(
         _datas[i].update({func.__name__.replace("async_get_", ""): rslt})
 
     i = 0
-    for k, v in coordinator.data.items():
+    for vehicle in coordinator.data.values():
         i += 1
-        _datas.update({i: vars(v)})
-        await diag(services.async_get_vehicle_details, k)
-        await diag(services.async_get_vehicle, k)
-        await diag(services.async_get_stored_position, k)
-        await diag(services.async_get_destinations, k)
-        await diag(services.async_get_history, k)
-        await diag(services.async_get_vehicule_users, k)
-        await diag(services.async_get_charger, k)
-        await diag(services.async_get_tripdata, k, "cyclic")
-        await diag(services.async_get_tripdata, k, "longTerm")
-        await diag(services.async_get_tripdata, k, "shortTerm")
-        await diag(services.async_get_operations_list, k)
-        await diag(services.async_get_climater, k)
-        await diag(services.async_get_preheater, k)
-        await diag(services.async_get_climater_timer, k)
-        await diag(services.async_get_capabilities, k)
-        await diag(services.async_get_vehicle_information)
-        await diag(services.async_get_honkflash, k)
-        await diag(services.async_get_fences, k)
-        await diag(services.async_get_fences_config, k)
-        await diag(services.async_get_speed_alert, k)
-        await diag(services.async_get_speed_config, k)
+        _datas.update({i: vars(vehicle)})
+        await diag(vehicle.async_get_vehicle_details)
+        await diag(vehicle.async_get_vehicle)
+        await diag(vehicle.async_get_stored_position)
+        await diag(vehicle.async_get_destinations)
+        await diag(vehicle.async_get_history)
+        await diag(vehicle.async_get_vehicule_users)
+        await diag(vehicle.async_get_charger)
+        await diag(vehicle.async_get_tripdata, "cyclic")
+        await diag(vehicle.async_get_tripdata, "longTerm")
+        await diag(vehicle.async_get_tripdata, "shortTerm")
+        await diag(vehicle.async_get_operations_list)
+        await diag(vehicle.async_get_climater)
+        await diag(vehicle.async_get_preheater)
+        await diag(vehicle.async_get_climater_timer)
+        await diag(vehicle.async_get_capabilities)
+        await diag(vehicle.async_get_honkflash)
+        await diag(vehicle.async_get_personal_data)
+        await diag(vehicle.async_get_real_car_data)
+        await diag(vehicle.async_get_mbb_status)
+        await diag(vehicle.async_get_identity_data)
+        await diag(vehicle.async_get_users)
+        await diag(vehicle.async_get_fences)
+        await diag(vehicle.async_get_fences_config)
+        await diag(vehicle.async_get_speed_alert)
+        await diag(vehicle.async_get_speed_config)
 
     return {
         "entry": {

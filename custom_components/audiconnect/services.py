@@ -37,7 +37,8 @@ async def async_setup_services(
         device_id = call.data.get(CONF_VIN).lower()
         device = dr.async_get(hass).async_get(device_id)
         vin = dict(device.identifiers).get(DOMAIN)
-        await coordinator.api.services.async_refresh_vehicle_data(vin)
+        vehicle = coordinator.api.vehicles.get(vin)
+        await vehicle.async_refresh_vehicle_data()
         await coordinator.async_request_refresh()
 
     async def async_turn_off_action(call: ServiceCall) -> None:
@@ -58,20 +59,21 @@ async def async_setup_services(
 
     async def async_actions(vin: str, action: str, mode: bool):
         """Execute action."""
+        vehicle = coordinator.api.vehicles.get(vin)
         try:
             match action:
                 case "lock":
-                    await coordinator.api.services.async_lock(vin, mode)
+                    await vehicle.async_set_lock(mode)
                 case "climater":
-                    await coordinator.api.services.async_climater(vin, mode)
+                    await vehicle.async_set_climater(mode)
                 case "charger":
-                    await coordinator.api.services.async_charger(vin, mode)
+                    await vehicle.async_set_charger(mode)
                 case "pre_heating":
-                    await coordinator.api.services.async_pre_heating(vin, mode)
+                    await vehicle.async_set_pre_heating(mode)
                 case "window_heating":
-                    await coordinator.api.services.async_window_heating(vin, mode)
+                    await vehicle.async_set_window_heating(mode)
                 case "ventilation":
-                    await coordinator.api.services.async_ventilation(vin, mode)
+                    await vehicle.async_set_ventilation(mode)
         except AudiException as error:
             _LOGGER.error(error)
         else:
