@@ -30,7 +30,7 @@ async def async_setup_entry(
 
     entities = []
     for vin, vehicle in coordinator.data.items():
-        for name, data in vehicle.states.items():
+        for name in vehicle.states:
             for description in SENSOR_TYPES:
                 if description.key == name:
                     entities.append(AudiDeviceTracker(coordinator, vin, description))
