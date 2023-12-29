@@ -11,7 +11,7 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **Diagnostics file**
-Please, add the file
+Please add the diagnostics file. This action runs all Audi APIs and stores them in raw format. Sensitive data is hidden
 
 ![Screenshot](https://github.com/cyr-ius/hass-audiconnect/assets/1258123/28916bd3-66fd-4df5-bf3c-93012c555051)
 
