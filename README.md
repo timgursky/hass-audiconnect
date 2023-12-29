@@ -50,6 +50,25 @@ Configuration is done through the Home Assistant UI.
 **region**
 
 - (selector)(Required) The region where your Audi Connect account is registered. 
+  
+Options
+--------
+
+**API Level**
+
+Depending on the model, Audi changes the way of carrying out actions such as switching on the air conditioning, triggering the charge or switching on the pre-heating and ventilation
+
+It is possible to change the level of the API call so that remote actions work.
+
+Example: e-tron models must have an API level Climatisation of 3 to activate the air conditioning.
+
+You can modify the following values using the options:
+
+    API level charger [1|2] (default:1)
+    API level climatisation [2|3] (default:2)
+    API level ventilation [1|2] (default:1)
+
+**BECAREFUL**: The default values are generally suitable for the majority of vehicles. Change the options only if strictly necessary.
 
 Services
 --------
