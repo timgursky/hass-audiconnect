@@ -67,7 +67,7 @@ async def async_setup_services(
                 case "climater":
                     await vehicle.async_set_climater(mode)
                 case "charger":
-                    await vehicle.async_set_charger(mode)
+                    await vehicle.async_set_battery_charger(mode)
                 case "pre_heating":
                     await vehicle.async_set_pre_heating(mode)
                 case "window_heating":
