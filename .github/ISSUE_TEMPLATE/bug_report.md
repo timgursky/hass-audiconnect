@@ -11,7 +11,9 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **Diagnostics file**
-Please, add the fie 
+Please, add the file
+
+![Screenshot](https://github.com/cyr-ius/hass-audiconnect/assets/1258123/28916bd3-66fd-4df5-bf3c-93012c555051)
 
 
 **Expected behavior**
