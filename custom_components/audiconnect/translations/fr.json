@@ -32,5 +32,23 @@
             "ventilation": "Ventilation"
           }
         }
-    }        
+    },
+    "options": {
+        "step": {
+          "init": {
+                "title": "Options",
+                "data": {
+                    "vehicle":"Vehicle",
+                    "save": "Save & Exit"
+                }
+            },
+            "apilevel": {
+                "data": {
+                    "api_level_climatisation":"API Level Climatisation",
+                    "api_level_ventilation": "API Level Ventilation",
+                    "api_level_charger": "API Level Charger"
+                }
+            }
+        }
+    }                 
 }

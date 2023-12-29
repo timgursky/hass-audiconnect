@@ -32,7 +32,7 @@ class AudiDataUpdateCoordinator(DataUpdateCoordinator):
         unit_system = (
             "imperial" if hass.config.units is US_CUSTOMARY_SYSTEM else "metric"
         )
-
+        self.options = entry.options
         self.api = AudiConnect(
             async_create_clientsession(hass),
             entry.data[CONF_USERNAME],
@@ -48,7 +48,18 @@ class AudiDataUpdateCoordinator(DataUpdateCoordinator):
             await self.api.async_update()
             if not self.api.is_connected:
                 raise UpdateFailed("Unable to connect")
+            self._set_api_level()
         except AudiException as error:
             raise UpdateFailed(error) from error
         else:
             return self.api.vehicles
+
+    def _set_api_level(self) -> None:
+        """Set API Level."""
+        if isinstance(self.api.vehicles, dict):
+            for vin, Vehicle in self.api.vehicles.items():
+                if api_levels := self.options.get(vin):
+                    for name, level in api_levels.items():
+                        Vehicle.set_api_level(
+                            name.replace("api_level_", ""), int(level)
+                        )
