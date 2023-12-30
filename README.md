@@ -67,11 +67,15 @@ You can modify the following values using the options:
 Services
 --------
 
-**audiconnect.refresh_vehicle_data**
+**audiconnect.refresh_data**
 
 Normal updates retrieve data from the Audi Connect service, and don't interact directly with the vehicle. _This_ service triggers an update request from the vehicle itself. When data is retrieved successfully, Home Assistant is automatically updated. The service requires a vehicle identification number (VIN) as a parameter.
 
+The value of the parameter used for VIN is the `device_id` of an entity in the integration.
+
 **audiconnect.execute_vehicle_action**
+
+Since version 1.3.0 the action services are called **audiconnect.turn_on_action** and **audiconnect.turn_off_action**
 
 Perform an action on the vehicle. The service takes a VIN and the action to perform as parameters. Possible action values:
 
@@ -90,6 +94,15 @@ Perform an action on the vehicle. The service takes a VIN and the action to perf
 **Note:** Certain action require the S-PIN to be set in the configuration.
 
 When an action is successfully performed, an update request is automatically triggered.
+
+Service call example: 
+```yaml
+action: call-service
+service: audiconnect.turn_on_action**
+data:
+	vin: your device_id goes here
+	action: climater
+```
 
 Example Dashboard Card
 ----------------------
