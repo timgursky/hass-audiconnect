@@ -45,6 +45,7 @@ TO_REDACT = {
     "nickname",
     "placeOfBirth",
     "carnetEnrollmentCountry",
+    "spin",
 }
 
 
