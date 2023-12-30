@@ -222,13 +222,33 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         key="doors_trunk_status",
         translation_key="doors_trunk_status",
     ),
-    AudiSensorDescription(key="trip", translation_key="trip"),
     AudiSensorDescription(
-        key="support_trip_short", translation_key="support_trip_short"
+        key="trip_short_current",
+        translation_key="trip_short_current",
+        value_fn=lambda x: x.get("timestamp"),
+        native_unit_of_measurement="datetime",
+        device_class=dc.TIMESTAMP,
     ),
-    AudiSensorDescription(key="support_trip_long", translation_key="support_trip_long"),
     AudiSensorDescription(
-        key="support_trip_cyclic", translation_key="support_trip_cyclic"
+        key="trip_short_reset",
+        translation_key="trip_short_reset",
+        value_fn=lambda x: x.get("timestamp"),
+        native_unit_of_measurement="datetime",
+        device_class=dc.TIMESTAMP,
+    ),
+    AudiSensorDescription(
+        key="trip_long_current",
+        translation_key="trip_long_current",
+        value_fn=lambda x: x.get("timestamp"),
+        native_unit_of_measurement="datetime",
+        device_class=dc.TIMESTAMP,
+    ),
+    AudiSensorDescription(
+        key="trip_long_reset",
+        translation_key="trip_long_reset",
+        value_fn=lambda x: x.get("timestamp"),
+        native_unit_of_measurement="datetime",
+        device_class=dc.TIMESTAMP,
     ),
 )
 
@@ -244,7 +264,15 @@ async def async_setup_entry(
         for name in vehicle.states:
             for description in SENSOR_TYPES:
                 if description.key == name:
-                    entities.append(AudiSensor(coordinator, vin, description))
+                    if description.key in [
+                        "trip_short_current",
+                        "trip_long_current",
+                        "trip_short_reset",
+                        "trip_long_reset",
+                    ]:
+                        entities.append(AudiTripSensor(coordinator, vin, description))
+                    else:
+                        entities.append(AudiSensor(coordinator, vin, description))
 
     async_add_entities(entities)
 
@@ -259,3 +287,20 @@ class AudiSensor(AudiEntity, SensorEntity):
         if value and self.entity_description.value_fn:
             return self.entity_description.value_fn(value)
         return value
+
+
+class AudiTripSensor(AudiEntity, SensorEntity):
+    """Representation of a Audi sensor."""
+
+    @property
+    def state(self):
+        """Return sensor state."""
+        value = self.coordinator.data[self.vin].states.get(self.uid)
+        if value and self.entity_description.value_fn:
+            return self.entity_description.value_fn(value)
+        return value
+
+    @property
+    def extra_state_attributes(self):
+        """Return extra state attributes."""
+        return self.coordinator.data[self.vin].states.get(self.uid)
