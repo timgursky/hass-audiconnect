@@ -28,7 +28,7 @@ SENSOR_TYPES: tuple[AudiSwitchDescription, ...] = (
         icon="mdi:ev-station",
         key="charging_state",
         value_fn=lambda x: x != "off",
-        turn_mode="async_set_charger",
+        turn_mode="async_set_batterycharger",
         translation_key="charging_state",
     ),
     AudiSwitchDescription(
