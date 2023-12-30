@@ -87,7 +87,7 @@ async def async_get_config_entry_diagnostics(
         await diag(vehicle.async_get_climater_timer)
         await diag(vehicle.async_get_capabilities)
         await diag(vehicle.async_get_honkflash)
-        await diag(vehicle.async_get_personal_data)
+        # await diag(vehicle.async_get_personal_data)
         await diag(vehicle.async_get_real_car_data)
         await diag(vehicle.async_get_mbb_status)
         await diag(vehicle.async_get_identity_data)
