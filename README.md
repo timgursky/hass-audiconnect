@@ -100,8 +100,8 @@ Service call example:
 action: call-service
 service: audiconnect.turn_on_action**
 data:
-	vin: your device_id goes here
-	action: climater
+  vin: your device_id goes here
+  action: climater
 ```
 
 Example Dashboard Card
