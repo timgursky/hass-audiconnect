@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import logging
 
+from audiconnectpy import AudiException
+
 from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -18,7 +20,7 @@ SENSOR_TYPES: tuple[AudiSelectDescription, ...] = (
     AudiSelectDescription(
         key="climatisation_heater_src",
         icon="mdi:air-conditioner",
-        turn_mode="set_heater_source",
+        turn_mode="async_set_climater",
         options=["electric", "auxiliary", "automatic"],
         translation_key="climatisation_heater_src",
     ),
@@ -51,3 +53,14 @@ class AudiSelect(AudiEntity, SelectEntity):
         if value and self.entity_description.value_fn:
             return self.entity_description.value_fn(value)
         return value
+
+    async def async_select_option(self, option: str) -> None:
+        """Change the selected option."""
+        try:
+            await getattr(
+                self.coordinator.api.vehicles.get(self.vin),
+                self.entity_description.turn_mode,
+            )(True, option)
+            await self.coordinator.async_request_refresh()
+        except AudiException as error:
+            _LOGGER.error("Error to select on : %s", error)
