@@ -39,6 +39,7 @@ CONF_SAVE = "save"
 API_LEVEL_CLIMATISATION = "api_level_climatisation"
 API_LEVEL_VENTILATION = "api_level_ventilation"
 API_LEVEL_CHARGER = "api_level_charger"
+API_LEVEL_WINDOWSHEATING = "api_level_windows_heating"
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -170,6 +171,19 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 vol.Required(
                     API_LEVEL_CHARGER,
                     default=api_level.get(API_LEVEL_CHARGER, "1"),
+                ): SelectSelector(
+                    SelectSelectorConfig(
+                        mode=SelectSelectorMode.DROPDOWN,
+                        options=[
+                            SelectOptionDict(value="1", label="Level 1"),
+                            SelectOptionDict(value="2", label="Level 2"),
+                            SelectOptionDict(value="2", label="Level 3"),
+                        ],
+                    )
+                ),
+                vol.Required(
+                    API_LEVEL_WINDOWSHEATING,
+                    default=api_level.get(API_LEVEL_WINDOWSHEATING, "1"),
                 ): SelectSelector(
                     SelectSelectorConfig(
                         mode=SelectSelectorMode.DROPDOWN,
