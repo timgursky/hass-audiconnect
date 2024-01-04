@@ -46,7 +46,9 @@
                 "data": {
                     "api_level_climatisation":"API Level Climatisation",
                     "api_level_ventilation": "API Level Ventilation",
-                    "api_level_charger": "API Level Charger"
+                    "api_level_charger": "API Level Charger",
+                    "api_level_windows_heating": "API Level Windows Heating",
+                    "api_level_lock": "API Level Lock"
                 }
             }
         }
