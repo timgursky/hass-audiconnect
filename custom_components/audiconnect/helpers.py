@@ -13,50 +13,57 @@ from homeassistant.components.switch import SwitchEntityDescription
 from homeassistant.helpers.typing import StateType
 
 
-@dataclass
-class AuditTurnMixin:
+@dataclass(frozen=True)
+class AudiTurnMixin:
     """Mixin for Audi sensor."""
 
     turn_mode: str
 
 
-@dataclass
-class AuditValueFnMixin:
-    """Mixin for Audi sensor."""
+@dataclass(frozen=True)
+class AudiSensorDescription(SensorEntityDescription):
+    """Describes a sensor."""
 
     value_fn: Callable[..., StateType] | None = None
 
 
-@dataclass
-class AudiSensorDescription(AuditValueFnMixin, SensorEntityDescription):
-    """Describes a sensor."""
+@dataclass(frozen=True)
+class AudiBinarySensorDescription(BinarySensorEntityDescription):
+    """Describes a binary sensor."""
+
+    value_fn: Callable[..., StateType] | None = None
 
 
-@dataclass
-class AudiBinarySensorDescription(AuditValueFnMixin, BinarySensorEntityDescription):
-    """Describes a sensor."""
+@dataclass(frozen=True)
+class AudiSelectDescription(SelectEntityDescription, AudiTurnMixin):
+    """Describes a select input."""
+
+    value_fn: Callable[..., StateType] | None = None
 
 
-@dataclass
-class AudiSelectDescription(AuditValueFnMixin, SelectEntityDescription, AuditTurnMixin):
-    """Describes a sensor."""
+@dataclass(frozen=True)
+class AudiNumberDescription(NumberEntityDescription, AudiTurnMixin):
+    """Describes a number input."""
+
+    value_fn: Callable[..., StateType] | None = None
 
 
-@dataclass
-class AudiNumberDescription(AuditValueFnMixin, NumberEntityDescription, AuditTurnMixin):
-    """Describes a sensor."""
+@dataclass(frozen=True)
+class AudiSwitchDescription(SwitchEntityDescription, AudiTurnMixin):
+    """Describes a switch."""
+
+    value_fn: Callable[..., StateType] | None = None
 
 
-@dataclass
-class AudiSwitchDescription(AuditValueFnMixin, SwitchEntityDescription, AuditTurnMixin):
-    """Describes a sensor."""
+@dataclass(frozen=True)
+class AudiLockDescription(LockEntityDescription, AudiTurnMixin):
+    """Describes a lock."""
+
+    value_fn: Callable[..., StateType] | None = None
 
 
-@dataclass
-class AudiLockDescription(AuditValueFnMixin, LockEntityDescription, AuditTurnMixin):
-    """Describes a sensor."""
+@dataclass(frozen=True)
+class AudiTrackerDescription(SensorEntityDescription):
+    """Describes a tracker."""
 
-
-@dataclass
-class AudiTrackerDescription(AuditValueFnMixin, SensorEntityDescription):
-    """Describes a sensor."""
+    value_fn: Callable[..., StateType] | None = None
