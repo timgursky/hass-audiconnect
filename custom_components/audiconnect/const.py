@@ -1,6 +1,12 @@
 """Constants for the Audi connect integration."""
 
 DOMAIN = "audiconnect"
+
+API_LEVEL_CLIMATISATION = "api_level_climatisation"
+API_LEVEL_VENTILATION = "api_level_ventilation"
+API_LEVEL_CHARGER = "api_level_charger"
+API_LEVEL_WINDOWSHEATING = "api_level_windows_heating"
+API_LEVEL_LOCK = "api_level_lock"
 CONF_COUNTRY = "region"
 CONF_VIN = "vin"
 CONF_ACTION = "action"
