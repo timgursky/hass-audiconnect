@@ -4,9 +4,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from audiconnectpy import AudiConnect, AudiException, AuthorizationError
 import voluptuous as vol
-
+from audiconnectpy import AudiConnect, AudiException, AuthorizationError
 from homeassistant import config_entries
 from homeassistant.const import CONF_PASSWORD, CONF_PIN, CONF_USERNAME
 from homeassistant.core import callback
@@ -20,7 +19,16 @@ from homeassistant.helpers.selector import (
     SelectSelectorMode,
 )
 
-from .const import CONF_COUNTRY, COUNTRY_CODE, DOMAIN
+from .const import (
+    API_LEVEL_CHARGER,
+    API_LEVEL_CLIMATISATION,
+    API_LEVEL_LOCK,
+    API_LEVEL_VENTILATION,
+    API_LEVEL_WINDOWSHEATING,
+    CONF_COUNTRY,
+    COUNTRY_CODE,
+    DOMAIN,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,10 +44,6 @@ DATA_SCHEMA = vol.Schema(
 
 CONF_VEHICLE = "vehicle"
 CONF_SAVE = "save"
-API_LEVEL_CLIMATISATION = "api_level_climatisation"
-API_LEVEL_VENTILATION = "api_level_ventilation"
-API_LEVEL_CHARGER = "api_level_charger"
-API_LEVEL_WINDOWSHEATING = "api_level_windows_heating"
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -191,6 +195,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             SelectOptionDict(value="1", label="Level 1"),
                             SelectOptionDict(value="2", label="Level 2"),
                         ],
+                    )
+                ),
+                vol.Required(
+                    API_LEVEL_LOCK,
+                    default=api_level.get(API_LEVEL_LOCK, "1"),
+                ): SelectSelector(
+                    SelectSelectorConfig(
+                        mode=SelectSelectorMode.DROPDOWN,
+                        options=[SelectOptionDict(value="1", label="Level 1")],
                     )
                 ),
             }
