@@ -237,8 +237,8 @@ SENSOR_TYPES: tuple[AudiBinarySensorDescription, ...] = (
     AudiBinarySensorDescription(
         icon="mdi:power-plug",
         key="plug_lock",
-        device_class=dc.PLUG,
-        value_fn=lambda x: False if x == "unlocked" else True,
+        device_class=dc.LOCK,
+        value_fn=lambda x: False if x == "locked" else True,
     ),
     AudiBinarySensorDescription(
         key="preheater_active",
