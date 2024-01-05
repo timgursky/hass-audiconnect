@@ -194,12 +194,6 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         translation_key="state_of_charge",
     ),
     AudiSensorDescription(
-        icon="mdi:power-plug",
-        key="plug_state",
-        device_class=dc.POWER_FACTOR,
-        translation_key="plug_state",
-    ),
-    AudiSensorDescription(
         icon="mdi:battery-charging",
         key="remaining_charging_time",
         value_fn=lambda x: "n/a"
