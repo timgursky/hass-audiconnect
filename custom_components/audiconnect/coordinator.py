@@ -13,11 +13,9 @@ from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util.unit_system import US_CUSTOMARY_SYSTEM
 
-from .const import CONF_COUNTRY, DOMAIN
+from .const import CONF_COUNTRY, CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
-
-SCAN_INTERVAL = 30
 
 
 class AudiDataUpdateCoordinator(DataUpdateCoordinator):
@@ -25,10 +23,6 @@ class AudiDataUpdateCoordinator(DataUpdateCoordinator):
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Class to manage fetching Heatzy data API."""
-        super().__init__(
-            hass, _LOGGER, name=DOMAIN, update_interval=timedelta(minutes=SCAN_INTERVAL)
-        )
-
         unit_system = (
             "imperial" if hass.config.units is US_CUSTOMARY_SYSTEM else "metric"
         )
@@ -40,6 +34,14 @@ class AudiDataUpdateCoordinator(DataUpdateCoordinator):
             entry.data[CONF_COUNTRY],
             entry.data.get(CONF_PIN),
             unit_system,
+        )
+        super().__init__(
+            hass,
+            _LOGGER,
+            name=DOMAIN,
+            update_interval=timedelta(
+                minutes=entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+            ),
         )
 
     async def _async_update_data(self) -> dict:

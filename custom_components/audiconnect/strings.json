@@ -35,11 +35,22 @@
     },
     "options": {
         "step": {
-          "init": {
+            "init": {
                 "title": "Options",
-                "data": {
-                    "vehicle":"Vehicle",
+                "menu_options": {
+                    "vehicles":"Select API Level",
+                    "other": "Other settings",
                     "save": "Save & Exit"
+                }
+            },
+            "vehicles": {
+                "data": {
+                    "vehicles": "Vehicles"
+                }
+            },
+            "other": {
+                "data": {
+                    "scan_interval":"Scan interval"
                 }
             },
             "apilevel": {

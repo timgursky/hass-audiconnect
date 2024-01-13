@@ -10,6 +10,7 @@ API_LEVEL_LOCK = "api_level_lock"
 CONF_COUNTRY = "region"
 CONF_VIN = "vin"
 CONF_ACTION = "action"
+CONF_VEHICLE = "vehicle"
 COUNTRY_CODE = {
     "AL": "Albania",
     "AM": "Armenia",
@@ -67,5 +68,10 @@ COUNTRY_CODE = {
     "ZA": "South Africa",
     "BA": "Bosnia and Herzegovina",
 }
+CONF_SCAN_INTERVAL = "scan_interval"
+DEFAULT_SCAN_INTERVAL = 30
 MANUFACTURER = "Audi"
 URL_WEBSITE = "https://my.audi.com"
+MENU_VEHICLES = "vehicles"
+MENU_OTHER = "other"
+MENU_SAVE = "save"
