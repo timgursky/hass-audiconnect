@@ -52,7 +52,11 @@ class AudiDataUpdateCoordinator(DataUpdateCoordinator):
         except AudiException as error:
             raise UpdateFailed(error) from error
         else:
-            return self.api.vehicles
+            return {
+                vin: vehicle
+                for vin, vehicle in self.api.vehicles.items()
+                if vehicle.support_vehicle is True
+            }
 
     def _set_api_level(self) -> None:
         """Set API Level."""
