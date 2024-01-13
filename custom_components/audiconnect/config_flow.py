@@ -4,8 +4,9 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import voluptuous as vol
 from audiconnectpy import AudiConnect, AudiException, AuthorizationError
+import voluptuous as vol
+
 from homeassistant import config_entries
 from homeassistant.const import CONF_PASSWORD, CONF_PIN, CONF_USERNAME
 from homeassistant.core import callback
@@ -85,7 +86,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await connection.async_update()
                 supported_vins = [
                     vin
-                    for vin, vehicle in self.api.vehicles.items()
+                    for vin, vehicle in connection.vehicles.items()
                     if vehicle.support_vehicle is True
                 ]
                 if len(supported_vins) == 0:
