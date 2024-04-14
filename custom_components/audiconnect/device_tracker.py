@@ -16,9 +16,7 @@ from .helpers import AudiTrackerDescription
 _LOGGER = logging.getLogger(__name__)
 
 SENSOR_TYPES: tuple[AudiTrackerDescription, ...] = (
-    AudiTrackerDescription(
-        key="position", translation_key="position"
-    ),
+    AudiTrackerDescription(key="position", translation_key="position"),
 )
 
 
@@ -60,4 +58,4 @@ class AudiDeviceTracker(AudiEntity, TrackerEntity):
     def extra_state_attributes(self):
         """Return extra attributes."""
         attr = self.coordinator.data[self.vin].states[self.uid]
-        return {"timestamp": attr["timestamp"], "parktime": attr["parktime"]}
+        return {"parktime": attr["parktime"]}
