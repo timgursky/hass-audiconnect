@@ -5,6 +5,8 @@ import logging
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass as dc,
+)
+from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
 )
 from homeassistant.config_entries import ConfigEntry
@@ -41,14 +43,24 @@ SENSOR_TYPES: tuple[AudiBinarySensorDescription, ...] = (
     ),
     AudiBinarySensorDescription(
         icon="mdi:car-light-alert",
-        key="light_status",
-        translation_key="light_status",
+        key="lights_status",
+        translation_key="lights_status",
     ),
     AudiBinarySensorDescription(
         icon="mdi:lightbulb",
         key="braking_status",
         value_fn=lambda x: x is True,
         translation_key="braking_status",
+    ),
+    AudiBinarySensorDescription(
+        icon="mdi:car-light-alert",
+        key="lights_right",
+        translation_key="lights_right",
+    ),
+    AudiBinarySensorDescription(
+        icon="mdi:car-light-alert",
+        key="lights_left",
+        translation_key="lights_left",
     ),
     AudiBinarySensorDescription(
         icon="mdi:power-plug",
@@ -102,7 +114,7 @@ SENSOR_TYPES: tuple[AudiBinarySensorDescription, ...] = (
         device_class=dc.DOOR,
         entity_registry_enabled_default=False,
         translation_key="open_roof_cover",
-    ),    
+    ),
     AudiBinarySensorDescription(
         icon="mdi:car-door",
         key="open_left_front_door",
@@ -142,7 +154,7 @@ SENSOR_TYPES: tuple[AudiBinarySensorDescription, ...] = (
         device_class=dc.DOOR,
         entity_registry_enabled_default=False,
         translation_key="open_bonnet",
-    ),    
+    ),
     AudiBinarySensorDescription(
         key="open_left_front_window",
         device_class=dc.WINDOW,
