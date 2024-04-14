@@ -3,7 +3,8 @@ from __future__ import annotations
 
 import logging
 
-from homeassistant.components.sensor import SensorDeviceClass as dc, SensorEntity
+from homeassistant.components.sensor import SensorDeviceClass as dc
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -32,6 +33,7 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         icon="mdi:update",
         key="last_update_time",
         device_class=dc.TIMESTAMP,
+        native_unit_of_measurement="datetime",
         translation_key="last_update_time",
     ),
     AudiSensorDescription(
@@ -225,7 +227,7 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         icon="mdi:car",
         key="overall_status",
         translation_key="overall_status",
-    ),    
+    ),
     AudiSensorDescription(
         key="trip_short_current",
         translation_key="trip_short_current",
