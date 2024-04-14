@@ -55,11 +55,13 @@ SENSOR_TYPES: tuple[AudiBinarySensorDescription, ...] = (
     AudiBinarySensorDescription(
         icon="mdi:car-light-alert",
         key="lights_right",
+        entity_registry_enabled_default=False,
         translation_key="lights_right",
     ),
     AudiBinarySensorDescription(
         icon="mdi:car-light-alert",
         key="lights_left",
+        entity_registry_enabled_default=False,
         translation_key="lights_left",
     ),
     AudiBinarySensorDescription(
