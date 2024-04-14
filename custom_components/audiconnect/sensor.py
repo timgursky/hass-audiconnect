@@ -116,7 +116,7 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         translation_key="bem_ok",
     ),
     AudiSensorDescription(
-        icon="mdi:gas-station",
+        icon="mdi:speedometer",
         device_class=dc.DISTANCE,
         native_unit_of_measurement="km",
         key="total_range",
@@ -219,8 +219,13 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
     AudiSensorDescription(
         icon="mdi:car-door",
         key="doors_trunk_status",
-        translation_key="doors_trunk_status",
+        translation_key="doors_lock_status",
     ),
+    AudiSensorDescription(
+        icon="mdi:car",
+        key="overall_status",
+        translation_key="overall_status",
+    ),    
     AudiSensorDescription(
         key="trip_short_current",
         translation_key="trip_short_current",
