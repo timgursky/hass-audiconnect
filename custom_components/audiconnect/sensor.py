@@ -206,7 +206,7 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         value_fn=lambda x: "n/a"
         if int(x) == 65535
         else f"{divmod(x, 60)[0]:02d}:{divmod(x, 60)[1]:02d}",
-        native_unit_of_measurement="Min",
+        native_unit_of_measurement="h",
         device_class=dc.DURATION,
         translation_key="remaining_charging_time",
     ),
