@@ -19,7 +19,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class AudiDataUpdateCoordinator(DataUpdateCoordinator):
-    """Define an object to fetch datas."""
+    """Define an object to fetch data."""
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Class to manage fetching Heatzy data API."""
