@@ -1,26 +1,26 @@
 {
-    "config": {
-        "abort": {
-            "invalid_credentials": "Ugyldige innloggingsopplysninger",
-            "user_already_configured": "Kontoen er allerede konfigurert"
+  "config": {
+    "abort": {
+      "invalid_credentials": "Ugyldige innloggingsopplysninger",
+      "user_already_configured": "Kontoen er allerede konfigurert"
+    },
+    "error": {
+      "invalid_credentials": "Ugyldige innloggingsopplysninger",
+      "invalid_username": "Ugyldig brukernavn",
+      "unexpected": "Uventet feil i kommunikasjonen med Audi Connect-serveren",
+      "user_already_configured": "Kontoen er allerede konfigurert"
+    },
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "data": {
+          "password": "Passord",
+          "username": "Brukernavn",
+          "pin": "S-PIN",
+          "region": "Region"
         },
-        "error": {
-            "invalid_credentials": "Ugyldige innloggingsopplysninger",
-            "invalid_username": "Ugyldig brukernavn",
-            "unexpected": "Uventet feil i kommunikasjonen med Audi Connect-serveren",
-            "user_already_configured": "Kontoen er allerede konfigurert"
-        },
-        "flow_title": "{name}",        
-        "step": {
-            "user": {
-                "data": {
-                    "password": "Passord",
-                    "username": "Brukernavn",
-                    "pin": "S-PIN",
-                    "region": "Region"
-                },
-                "title": "Audi Connect kontoinformasjon"
-            }
-        }
+        "title": "Audi Connect kontoinformasjon"
+      }
     }
+  }
 }

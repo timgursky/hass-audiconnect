@@ -1,13 +1,11 @@
-Audi Connect Integration for Home Assistant
-============================================================
+# Audi Connect Integration for Home Assistant
 
 ![GitHub release](https://img.shields.io/github/release/Cyr-ius/hass-audiconnect)
 ![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat)
 ![GitHub](https://img.shields.io/github/license/cyr-ius/hass-audiconnect)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
-Description
-------------
+## Description
 
 The `audiconnect` component provides an integration with the Audi Connect cloud service. It adds presence detection, sensors such as range, mileage, and fuel level, and provides car actions such as locking/unlocking and setting the pre-heater.
 
@@ -16,8 +14,7 @@ The `audiconnect` component provides an integration with the Audi Connect cloud 
 Credit for initial API discovery go to the guys at the ioBroker VW-Connect forum, who were able to figure out how the API and the PIN hashing works. Also some implementation credit to davidgiga1993 of the original [AudiAPI](https://github.com/davidgiga1993/AudiAPI) Python package, on which some of this code is loosely based.
 Thank you at arjenvrh who knew how to maintain and evolve the code for many years
 
-Installation
-------------
+## Installation
 
 Installation can be done manually by copying the files in this repository into the `custom_components` directory in the Home Assistant configuration directory:
 
@@ -28,8 +25,7 @@ Installation can be done manually by copying the files in this repository into t
 5. Restart Home Assistant.
 6. Add the integration to Home Assistant (see **Configuration**).
 
-Configuration
--------------
+## Configuration
 
 Configuration is done through the Home Assistant UI.
 
@@ -44,9 +40,8 @@ Configuration is done through the Home Assistant UI.
 - **S-PIN** (string)(Optional) The S-PIN for your Audi Connect account.
 
 - **region** (selector)(Required) The region where your Audi Connect account is registered.
-  
-Options
---------
+
+## Options
 
 **API Level**
 
@@ -64,8 +59,7 @@ You can modify the following values using the options:
 
 **BECAREFUL**: The default values are generally suitable for the majority of vehicles. Change the options only if strictly necessary.
 
-Services
---------
+## Services
 
 **audiconnect.refresh_data**
 
@@ -95,7 +89,8 @@ Perform an action on the vehicle. The service takes a VIN and the action to perf
 
 When an action is successfully performed, an update request is automatically triggered.
 
-Service call example: 
+Service call example:
+
 ```yaml
 action: call-service
 service: audiconnect.turn_on_action**
@@ -104,8 +99,7 @@ data:
   action: climater
 ```
 
-Example Dashboard Card
-----------------------
+## Example Dashboard Card
 
 Below is an example Dashboard (Lovelace) card illustrating some of the sensors this Home Assistant addon provides.
 
@@ -113,7 +107,7 @@ Below is an example Dashboard (Lovelace) card illustrating some of the sensors t
 
 ```yaml
 type: picture-elements
-image: '/local/audi.jpg '
+image: "/local/audi.jpg "
 elements:
   - type: state-icon
     icon: mdi:car-door
@@ -123,8 +117,8 @@ elements:
     style:
       left: 12%
       top: 86%
-      '--paper-item-icon-color': white
-      '--paper-item-icon-active-color': red
+      "--paper-item-icon-color": white
+      "--paper-item-icon-active-color": red
   - type: state-label
     entity: lock.audi_a4_berline_any_door_unlocked
     style:
@@ -177,8 +171,8 @@ elements:
       color: white
       left: 90%
       top: 86%
-      '--paper-item-icon-color': white
-      '--paper-item-icon-active-color': red
+      "--paper-item-icon-color": white
+      "--paper-item-icon-active-color": red
   - type: state-label
     entity: binary_sensor.audi_a4_berline_any_tyre_pressure
     style:
@@ -192,10 +186,10 @@ elements:
       left: 1%
       top: 1%
       transform: scale(0.7,0.7)
-      '--label-badge-red': gray
-      '--label-badge-background-color': transparent
-      '--ha-label-badge-label-color': black
-      '--label-badge-text-color': black
+      "--label-badge-red": gray
+      "--label-badge-background-color": transparent
+      "--ha-label-badge-label-color": black
+      "--label-badge-text-color": black
   - type: state-badge
     entity: sensor.audi_a4_berline_range
     style:
@@ -203,9 +197,8 @@ elements:
       right: 1%
       top: 1%
       transform: scale(0.7,0.7)
-      '--label-badge-red': gray
-      '--label-badge-background-color': transparent
-      '--ha-label-badge-label-color': black
-      '--label-badge-text-color': black
-
+      "--label-badge-red": gray
+      "--label-badge-background-color": transparent
+      "--ha-label-badge-label-color": black
+      "--label-badge-text-color": black
 ```

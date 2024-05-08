@@ -1,68 +1,67 @@
 {
-    "config": {
-        "abort": {
-            "already_configured": "Service déjà configuré"
-        },
-        "error": {
-            "cannot_connect": "Impossible de se connecter",
-            "invalid_auth": "Authentification invalide",
-            "unknown": "Erreur inconnue"
-        },
-        "flow_title": "{name}",        
-        "step": {
-            "user": {
-                "title": "Enregistre ton compte",
-                "data": {
-                    "username": "Email",
-                    "password": "Mot de passe",
-                    "country": "Code pays",
-                    "pin": "Code Pin"
-                }
-            }
-        }        
-    }, 
-    "selector": {
-        "select_mode": {
-          "options": {
-            "lock": "Verrouillage",
-            "climater": "Climatisation",
-            "charger": "Chargement",
-            "pre_heating": "Préchauffage",
-            "window_heating": "Dégivrage",
-            "ventilation": "Ventilation"
-          }
-        }
+  "config": {
+    "abort": {
+      "already_configured": "Service déjà configuré"
     },
-    "options": {
-        "step": {
-
-          "init": {
-                "title": "Options",
-                "menu_options": {
-                    "vehicles":"Selectionne API Level",
-                    "other": "Autre paramètres",
-                    "save": "Sauvegarder et sortir"
-                }
-            },
-            "vehicles": {
-                "data": {
-                    "vehicles": "Vehicules"
-                }
-            },
-            "other": {
-                "data": {
-                    "scan_interval":"scan interval"
-                }
-            },
-            "apilevel": {
-                "data": {
-                    "api_level_climatisation":"API Level Climatisation",
-                    "api_level_ventilation": "API Level Ventilation",
-                    "api_level_charger": "API Level Charger",
-                    "api_level_windows_heating": "API Level Windows Heating",
-                    "api_level_lock": "API Level Lock"
-                }
-            }
+    "error": {
+      "cannot_connect": "Impossible de se connecter",
+      "invalid_auth": "Authentification invalide",
+      "unknown": "Erreur inconnue"
+    },
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "Enregistre ton compte",
+        "data": {
+          "username": "Email",
+          "password": "Mot de passe",
+          "country": "Code pays",
+          "pin": "Code Pin"
         }
-    }                  
+      }
+    }
+  },
+  "selector": {
+    "select_mode": {
+      "options": {
+        "lock": "Verrouillage",
+        "climater": "Climatisation",
+        "charger": "Chargement",
+        "pre_heating": "Préchauffage",
+        "window_heating": "Dégivrage",
+        "ventilation": "Ventilation"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options",
+        "menu_options": {
+          "vehicles": "Selectionne API Level",
+          "other": "Autre paramètres",
+          "save": "Sauvegarder et sortir"
+        }
+      },
+      "vehicles": {
+        "data": {
+          "vehicles": "Vehicules"
+        }
+      },
+      "other": {
+        "data": {
+          "scan_interval": "scan interval"
+        }
+      },
+      "apilevel": {
+        "data": {
+          "api_level_climatisation": "API Level Climatisation",
+          "api_level_ventilation": "API Level Ventilation",
+          "api_level_charger": "API Level Charger",
+          "api_level_windows_heating": "API Level Windows Heating",
+          "api_level_lock": "API Level Lock"
+        }
+      }
+    }
+  }
 }
