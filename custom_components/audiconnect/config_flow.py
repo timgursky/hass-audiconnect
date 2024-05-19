@@ -1,4 +1,5 @@
 """Config flow for Audi connect integration."""
+
 from __future__ import annotations
 
 import logging
@@ -66,26 +67,18 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_USERNAME: user_input[CONF_USERNAME],
                     },
                 )
-                connection = AudiConnect(
+                api = AudiConnect(
                     async_create_clientsession(self.hass),
                     user_input[CONF_USERNAME],
                     user_input[CONF_PASSWORD],
                     user_input[CONF_COUNTRY],
                     user_input.get(CONF_PIN),
                 )
-                if await connection.async_login() is False:
+                await api.async_login()
+                if not api.is_connected:
                     raise AuthorizationError(
                         "Unexpected error communicating with the Audi server"
                     )
-
-                await connection.async_update()
-                supported_vins = [
-                    vin
-                    for vin, vehicle in connection.vehicles.items()
-                    if vehicle.support_vehicle is True
-                ]
-                if len(supported_vins) == 0:
-                    raise AudiException("Vehicles not supported")
 
             except AuthorizationError:
                 errors["base"] = "invalid_auth"
