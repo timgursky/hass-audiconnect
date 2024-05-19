@@ -20,6 +20,7 @@ _LOGGER = logging.getLogger(__name__)
 SENSOR_TYPES: tuple[AudiSwitchDescription, ...] = (
     AudiSwitchDescription(
         icon="mdi:ev-station",
+        name="Charging",
         key="charging",
         value="charging.charging_status.charging_state",
         turn_mode="async_set_battery_charger",
@@ -29,6 +30,7 @@ SENSOR_TYPES: tuple[AudiSwitchDescription, ...] = (
     AudiSwitchDescription(
         icon="mdi:air-conditioner",
         key="climatisation",
+        name="Climatisation",
         value="climatisation.climatisation_status.climatisation_state",
         turn_mode="async_set_climater",
         translation_key="climatisation",

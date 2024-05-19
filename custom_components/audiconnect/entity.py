@@ -49,20 +49,13 @@ class AudiEntity(CoordinatorEntity[AudiDataUpdateCoordinator], Entity):
         self.entity_description = description
 
         self._attr_unique_id = f"{vehicle.vin}_{description.key}"
-        self._attr_name = description.key.capitalize().replace("_", " ")
         self._attr_device_info = {
+            "configuration_url": URL_WEBSITE,
+            "hw_version": vehicle.infos.core.model_year,
             "identifiers": {(DOMAIN, vehicle.vin)},
             "manufacturer": MANUFACTURER,
+            "model": vehicle.infos.media.long_name,
             "name": vehicle.infos.media.short_name,
-            "model": vehicle.infos.media.long_name,
-            "configuration_url": URL_WEBSITE,
-        }
-        self._attr_extra_state_attributes = {
-            "model": vehicle.infos.media.long_name,
-            "model_year": vehicle.infos.core.model_year,
-            "title": vehicle.infos.media.short_name,
-            "csid": vehicle.csid,
-            "vin": vehicle.vin,
         }
 
     @callback
