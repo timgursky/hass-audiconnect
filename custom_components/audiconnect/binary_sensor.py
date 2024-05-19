@@ -234,7 +234,7 @@ SENSOR_TYPES: tuple[AudiBinarySensorDescription, ...] = (
     ),
     AudiBinarySensorDescription(
         key="charging_state",
-        name="Carging state",
+        name="Charging state",
         value="charging.charging_status.charging_state",
         device_class=dc.BATTERY_CHARGING,
         translation_key="charging_state",
