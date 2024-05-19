@@ -1,4 +1,5 @@
 """Helpers for component."""
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -25,6 +26,7 @@ class AudiSensorDescription(SensorEntityDescription):
     """Describes a sensor."""
 
     value_fn: Callable[..., StateType] | None = None
+    value: tuple(str) | None = None
 
 
 @dataclass(frozen=True)
@@ -32,6 +34,7 @@ class AudiBinarySensorDescription(BinarySensorEntityDescription):
     """Describes a binary sensor."""
 
     value_fn: Callable[..., StateType] | None = None
+    value: tuple(str) | None = None
 
 
 @dataclass(frozen=True)
@@ -39,6 +42,7 @@ class AudiSelectDescription(SelectEntityDescription, AudiTurnMixin):
     """Describes a select input."""
 
     value_fn: Callable[..., StateType] | None = None
+    value: tuple(str) | None = None
 
 
 @dataclass(frozen=True)
@@ -46,6 +50,7 @@ class AudiNumberDescription(NumberEntityDescription, AudiTurnMixin):
     """Describes a number input."""
 
     value_fn: Callable[..., StateType] | None = None
+    value: tuple(str) | None = None
 
 
 @dataclass(frozen=True)
@@ -53,6 +58,7 @@ class AudiSwitchDescription(SwitchEntityDescription, AudiTurnMixin):
     """Describes a switch."""
 
     value_fn: Callable[..., StateType] | None = None
+    value: tuple(str) | None = None
 
 
 @dataclass(frozen=True)
@@ -60,6 +66,7 @@ class AudiLockDescription(LockEntityDescription, AudiTurnMixin):
     """Describes a lock."""
 
     value_fn: Callable[..., StateType] | None = None
+    value: tuple(str) | None = None
 
 
 @dataclass(frozen=True)
@@ -67,3 +74,4 @@ class AudiTrackerDescription(SensorEntityDescription):
     """Describes a tracker."""
 
     value_fn: Callable[..., StateType] | None = None
+    value: tuple(str) | None = None
