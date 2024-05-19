@@ -214,9 +214,9 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
     ),
     AudiSensorDescription(
         icon="mdi:led-on",
-        key="plu_led_color",
+        key="plug_led_color",
         value=("charging", "plug_status", "led_color"),
-        translation_key="plu_led_color",
+        translation_key="plug_led_color",
         entity_registry_enabled_default=False,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
