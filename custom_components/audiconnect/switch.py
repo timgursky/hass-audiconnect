@@ -21,7 +21,7 @@ SENSOR_TYPES: tuple[AudiSwitchDescription, ...] = (
     AudiSwitchDescription(
         icon="mdi:ev-station",
         key="charging",
-        value=("charging", "charging_status", "charging_state"),
+        value="charging.charging_status.charging_state",
         turn_mode="async_set_battery_charger",
         translation_key="charging",
         entity_registry_enabled_default=False,
@@ -29,7 +29,7 @@ SENSOR_TYPES: tuple[AudiSwitchDescription, ...] = (
     AudiSwitchDescription(
         icon="mdi:air-conditioner",
         key="climatisation",
-        value=("climatisation", "climatisation_status", "climatisation_state"),
+        value="climatisation.climatisation_status.climatisation_state",
         turn_mode="async_set_climater",
         translation_key="climatisation",
         entity_registry_enabled_default=False,

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from operator import attrgetter
 
 from audiconnectpy.vehicle import Vehicle
 
@@ -45,8 +46,6 @@ class AudiEntity(CoordinatorEntity[AudiDataUpdateCoordinator], Entity):
         """Initialize the entity."""
         super().__init__(coordinator)
         self.vehicle = vehicle
-        self.vin = vehicle.vin
-        self.uid = description.key
         self.entity_description = description
 
         self._attr_unique_id = f"{vehicle.vin}_{description.key}"
@@ -66,26 +65,18 @@ class AudiEntity(CoordinatorEntity[AudiDataUpdateCoordinator], Entity):
             "vin": vehicle.vin,
         }
 
-        _LOGGER.debug(self.entity_description.key)
-        _LOGGER.debug(self.entity_description.value)
-
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         for vehicle in self.coordinator.data:
-            if vehicle.vin == self.vin:
+            if vehicle.vin == self.vehicle.vin:
                 break
         self.vehicle = vehicle
         self.async_write_ha_state()
 
-    def getattr(self, values: tuple(str)) -> str | float | int | bool | None:
+    def getattr(self, value: str) -> str | float | int | bool | None:
         """Get recursive attribute."""
-        obj = self.vehicle
-        value = None
-        if values:
-            for v in values:
-                value = getattr(obj, v)
-                if value is None:
-                    break
-                obj = value
-        return value
+        try:
+            return attrgetter(value)(self.vehicle)
+        except AttributeError:
+            return None
