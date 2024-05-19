@@ -48,10 +48,10 @@ SENSOR_TYPES: tuple[AudiBinarySensorDescription, ...] = (
     ),
     AudiBinarySensorDescription(
         icon="mdi:car-light-alert",
-        key="lights_status",
+        key="lights",
         value=("vehicle_lights", "lights_status", "lights", "status"),
         device_class=dc.LIGHT,
-        translation_key="lights_status",
+        translation_key="lights",
     ),
     AudiBinarySensorDescription(
         icon="mdi:car-door-lock",
