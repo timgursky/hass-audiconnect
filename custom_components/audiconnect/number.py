@@ -1,4 +1,5 @@
 """Support for Audi Connect switches."""
+
 from __future__ import annotations
 
 import logging
@@ -20,25 +21,26 @@ SENSOR_TYPES: tuple[AudiNumberDescription, ...] = (
     AudiNumberDescription(
         icon="mdi:current-ac",
         native_unit_of_measurement="A",
-        key="max_charge_current",
+        key="max_charge_current_ac",
+        value=("charging", "charging_settings", "max_charge_current_ac"),
         turn_mode="async_set_charger_max",
         native_max_value=32,
         native_min_value=0,
         native_step=1,
-        translation_key="max_charge_current",
+        translation_key="max_charge_current_ac",
         device_class=dc.CURRENT,
     ),
     AudiNumberDescription(
         icon="mdi:temperature-celsius",
         native_unit_of_measurement="°C",
-        key="climatisation_target_temp",
+        key="climatisation_target_temperature",
+        value=("climatisation", "climatisation_settings", "target_temperature_c"),
         turn_mode="async_set_climater_temp",
-        value_fn=lambda x: round((int(x) - 2730) / 10, 1),
         device_class=dc.TEMPERATURE,
         native_max_value=40,
         native_min_value=7,
         native_step=0.1,
-        translation_key="climatisation_target_temp",
+        translation_key="climatisation_target_temperature",
     ),
 )
 
@@ -48,14 +50,11 @@ async def async_setup_entry(
 ) -> None:
     """Set up the switch."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
-
-    entities = []
-    for vin, vehicle in coordinator.data.items():
-        for name in vehicle.states:
-            for description in SENSOR_TYPES:
-                if description.key == name:
-                    entities.append(AudiNumber(coordinator, vin, description))
-
+    entities = [
+        AudiNumber(coordinator, vehicle, description)
+        for description in SENSOR_TYPES
+        for vehicle in coordinator.data
+    ]
     async_add_entities(entities)
 
 
@@ -70,16 +69,13 @@ class AudiNumber(AudiEntity, NumberEntity):
     @property
     def native_value(self) -> float:
         """Native value."""
-        value = self.coordinator.data[self.vin].states.get(self.uid)
-        if value and self.entity_description.value_fn:
-            return self.entity_description.value_fn(value)
-        return value
+        return self.getattr(self.entity_description.value)
 
     async def async_set_native_value(self, value: float) -> None:
         """Set the text value."""
         try:
             await getattr(
-                self.coordinator.api.vehicles.get(self.vin),
+                self.vehicle,
                 self.entity_description.turn_mode,
             )(value)
             await self.coordinator.async_request_refresh()

@@ -1,10 +1,10 @@
 """Support for Audi Connect sensors."""
+
 from __future__ import annotations
 
 import logging
 
-from homeassistant.components.sensor import SensorDeviceClass as dc
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorDeviceClass as dc, SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -18,243 +18,240 @@ _LOGGER = logging.getLogger(__name__)
 
 SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
     AudiSensorDescription(
-        key="last_access",
         icon="mdi:clock",
-        native_unit_of_measurement="datetime",
-        device_class=dc.TIMESTAMP,
-        translation_key="last_access",
-    ),
-    AudiSensorDescription(
-        icon="mdi:air-conditioner",
-        key="climatisation_state",
-        translation_key="climatisation_state",
-    ),
-    AudiSensorDescription(
-        icon="mdi:update",
         key="last_update_time",
-        device_class=dc.TIMESTAMP,
+        value=("last_access",),
         native_unit_of_measurement="datetime",
+        device_class=dc.TIMESTAMP,
         translation_key="last_update_time",
-    ),
-    AudiSensorDescription(
-        icon="mdi:ev-station",
-        key="charging_state",
-        translation_key="charging_state",
-    ),
-    AudiSensorDescription(
-        icon="mdi:speedometer",
-        native_unit_of_measurement="km",
-        key="utc_time_and_kilometer_status",
-        device_class=dc.DISTANCE,
-        translation_key="utc_time_and_kilometer_status",
-    ),
-    AudiSensorDescription(
-        icon="mdi:oil",
-        native_unit_of_measurement="km",
-        key="maintenance_interval_distance_to_oil_change",
-        device_class=dc.DISTANCE,
-        value_fn=lambda x: abs(int(x)),
-        entity_registry_enabled_default=False,
-        translation_key="maintenance_interval_distance_to_oil_change",
     ),
     AudiSensorDescription(
         icon="mdi:temperature-celsius",
         native_unit_of_measurement="°C",
-        key="climatisation_target_temp",
-        value_fn=lambda x: round((int(x) - 2730) / 10, 1),
+        key="cliamtisation_target_temperature",
+        value=("climatisation", "climatisation_settings", "target_temperature_c"),
         device_class=dc.TEMPERATURE,
-        translation_key="climatisation_target_temp",
+        translation_key="cliamtisation_target_temperature",
+    ),
+    AudiSensorDescription(
+        icon="mdi:oil",
+        native_unit_of_measurement="km",
+        key="maintenance_inspection_to_oil_change",
+        value=("vehicle_health_inspection", "maintenance_status", "oil_service_due_km"),
+        device_class=dc.DISTANCE,
+        entity_registry_enabled_default=False,
+        translation_key="maintenance_interval_distance_to_oil_change",
     ),
     AudiSensorDescription(
         icon="mdi:oil",
         native_unit_of_measurement="d",
-        key="maintenance_interval_time_to_oil_change",
+        key="maintenance_interval_to_oil_change",
+        value=(
+            "vehicle_health_inspection",
+            "maintenance_status",
+            "oil_service_due_days",
+        ),
         device_class=dc.DURATION,
-        value_fn=lambda x: abs(int(x)),
         entity_registry_enabled_default=False,
         translation_key="maintenance_interval_time_to_oil_change",
     ),
     AudiSensorDescription(
         icon="mdi:room-service-outline",
         native_unit_of_measurement="km",
-        key="maintenance_interval_distance_to_inspection",
+        key="maintenance_inspection",
+        value=("vehicle_health_inspection", "maintenance_status", "inspection_due_km"),
         device_class=dc.DISTANCE,
-        value_fn=lambda x: abs(int(x)),
-        translation_key="maintenance_interval_distance_to_inspection",
+        translation_key="maintenance_inspection",
     ),
     AudiSensorDescription(
         icon="mdi:room-service-outline",
         native_unit_of_measurement="d",
-        key="maintenance_interval_time_to_inspection",
+        key="maintenance_interval",
+        value=(
+            "vehicle_health_inspection",
+            "maintenance_status",
+            "inspection_due_days",
+        ),
         device_class=dc.DURATION,
-        value_fn=lambda x: abs(int(x)),
         entity_registry_enabled_default=False,
-        translation_key="maintenance_interval_time_to_inspection",
-    ),
-    AudiSensorDescription(
-        icon="mdi:oil",
-        native_unit_of_measurement="%",
-        key="oil_level_dipsticks_percentage",
-        translation_key="oil_level_dipsticks_percentage",
-    ),
-    AudiSensorDescription(
-        key="adblue_range",
-        icon="mdi:cup-water",
-        entity_registry_enabled_default=False,
-        native_unit_of_measurement="km",
-        device_class=dc.DISTANCE,
-        translation_key="adblue_range",
-    ),
-    AudiSensorDescription(
-        device_class=dc.TEMPERATURE,
-        native_unit_of_measurement="°C",
-        key="temperature_outside",
-        translation_key="temperature_outside",
-    ),
-    AudiSensorDescription(
-        key="bem_ok",
-        device_class="problem",
-        entity_registry_enabled_default=False,
-        translation_key="bem_ok",
+        translation_key="maintenance_interval",
     ),
     AudiSensorDescription(
         icon="mdi:speedometer",
         device_class=dc.DISTANCE,
         native_unit_of_measurement="km",
         key="total_range",
+        value=("measurements", "odometer_status", "odometer"),
         translation_key="total_range",
+    ),
+    AudiSensorDescription(
+        icon="mdi:speedometer",
+        device_class=dc.DISTANCE,
+        native_unit_of_measurement="km",
+        key="electric_range",
+        value=("measurements", "range_status", "electric_range"),
+        translation_key="electric_range",
+        entity_registry_enabled_default=False,
+    ),
+    AudiSensorDescription(
+        icon="mdi:speedometer",
+        device_class=dc.DISTANCE,
+        native_unit_of_measurement="km",
+        key="gasoline_range",
+        value=("measurements", "range_status", "gasoline_range"),
+        translation_key="gasoline_range",
     ),
     AudiSensorDescription(
         icon="mdi:gas-station",
         native_unit_of_measurement="%",
-        key="tank_level_in_percentage",
-        translation_key="tank_level_in_percentage",
+        key="tank_level",
+        value=("measurements", "fuel_level_status", "current_fuel_level_pct"),
+        translation_key="tank_level",
     ),
     AudiSensorDescription(
-        native_unit_of_measurement="Min",
-        key="preheater_duration",
-        icon="mdi:clock",
-        device_class=dc.DURATION,
-        translation_key="preheater_duration",
+        icon="mdi:engine",
+        key="primary_engine_type",
+        value=("measurements", "fuel_level_status", "primary_engine_type"),
+        translation_key="primary_engine_type",
+        entity_registry_enabled_default=False,
     ),
     AudiSensorDescription(
-        native_unit_of_measurement="Min",
-        key="preheater_remaining",
-        icon="mdi:clock",
-        device_class=dc.DURATION,
-        translation_key="preheater_remaining",
+        icon="mdi:engine",
+        key="secondary_engine_type",
+        value=("measurements", "fuel_level_status", "secondary_engine_type"),
+        translation_key="secondary_engine_type",
+        entity_registry_enabled_default=False,
     ),
     AudiSensorDescription(
-        icon="mdi:electron-framework",
-        key="actual_charge_rate",
-        value_fn=lambda x: float(x) / 10,
-        translation_key="actual_charge_rate",
+        icon="mdi:engine",
+        key="battery_temperature_max",
+        value=(
+            "measurements",
+            "temperature_battery_status",
+            "temperature_hv_battery_max_k",
+        ),
+        device_class=dc.TEMPERATURE,
+        native_unit_of_measurement="K",
+        translation_key="battery_temperature_max",
+        entity_registry_enabled_default=False,
     ),
     AudiSensorDescription(
-        key="actual_charge_rate_unit",
-        value_fn=lambda x: x.replace("_per_", "/"),
-        translation_key="actual_charge_rate_unit",
+        icon="mdi:engine",
+        key="battery_temperature_min",
+        value=(
+            "measurements",
+            "temperature_battery_status",
+            "temperature_hv_battery_min_k",
+        ),
+        device_class=dc.TEMPERATURE,
+        native_unit_of_measurement="K",
+        translation_key="battery_temperature_min",
+        entity_registry_enabled_default=False,
+    ),
+    AudiSensorDescription(
+        icon="mdi:ev-station",
+        key="battery_level",
+        value=("charging", "battery_status", "current_soc_pct"),
+        device_class=dc.BATTERY,
+        translation_key="battery_level",
+        entity_registry_enabled_default=False,
+    ),
+    AudiSensorDescription(
+        icon="mdi:ev-station",
+        key="cruising_range_electric",
+        value=("charging", "battery_status", "cruising_range_electric_km"),
+        device_class=dc.DISTANCE,
+        native_unit_of_measurement="km",
+        translation_key="cruising_range_electric",
+        entity_registry_enabled_default=False,
+    ),
+    AudiSensorDescription(
+        key="charge_rate",
+        value=("charging", "charging_status", "charge_rate_kmph"),
+        device_class=dc.DISTANCE,
+        native_unit_of_measurement="km",
+        translation_key="charge_rate_kmph",
+        entity_registry_enabled_default=False,
     ),
     AudiSensorDescription(
         icon="mdi:flash",
         device_class=dc.POWER,
         native_unit_of_measurement="kW",
-        key="charging_power",
-        value_fn=lambda x: int(x) / 1000,
-        translation_key="charging_power",
+        key="charge_power_kw",
+        value=("charging", "charging_status", "charge_power_kw"),
+        translation_key="charge_power_kw",
+        entity_registry_enabled_default=False,
     ),
     AudiSensorDescription(
-        icon="mdi:engine",
-        key="primary_engine_type",
-        translation_key="primary_engine_type",
+        icon="mdi:battery-charging",
+        key="remaining_charging",
+        value=("charging", "charging_status", "remaining_charging_time"),
+        native_unit_of_measurement="min",
+        device_class=dc.DURATION,
+        translation_key="remaining_charging",
+        entity_registry_enabled_default=False,
     ),
     AudiSensorDescription(
-        icon="mdi:engine",
-        key="secondary_engine_type",
-        translation_key="secondary_engine_type",
+        icon="mdi:car-info",
+        key="charge_type",
+        value=("charging", "charging_status", "charge_type"),
+        native_unit_of_measurement="min",
+        device_class=dc.DURATION,
+        translation_key="charge_type",
+        entity_registry_enabled_default=False,
     ),
     AudiSensorDescription(
-        key="hybrid_range",
-        native_unit_of_measurement="km",
-        translation_key="hybrid_range",
-        device_class=dc.DISTANCE,
+        icon="mdi:ev-station",
+        key="battery_level_target",
+        value=("charging", "charge_settings", "target_soc_pct"),
+        native_unit_of_measurement="%",
+        device_class=dc.POWER_FACTOR,
+        translation_key="battery_level_target",
+        entity_registry_enabled_default=False,
+    ),
+    AudiSensorDescription(
+        icon="mdi:led-on",
+        key="led_color",
+        value=("charging", "plug_status", "led_color"),
+        translation_key="led_color",
+        entity_registry_enabled_default=False,
+    ),
+    AudiSensorDescription(
+        icon="mdi:av-timer",
+        key="remaining_climatisation",
+        value=(
+            "climatisation",
+            "climatisation_status",
+            "remaining_climatisation_time_min",
+        ),
+        native_unit_of_measurement="min",
+        device_class=dc.DURATION,
+        translation_key="remaining_climatisation",
+        entity_registry_enabled_default=False,
     ),
     AudiSensorDescription(
         icon="mdi:gas-station-outline",
         key="primary_engine_range",
+        value=("fuel_status", "range_status", "primary_engine", "remaining_range_km"),
         native_unit_of_measurement="km",
         translation_key="primary_engine_range",
         device_class=dc.DISTANCE,
+        entity_registry_enabled_default=False,
     ),
     AudiSensorDescription(
         icon="mdi:gas-station-outline",
         key="secondary_engine_range",
+        value=("fuel_status", "range_status", "secondary_engine", "remaining_range_km"),
         native_unit_of_measurement="km",
         device_class=dc.DISTANCE,
         translation_key="secondary_engine_range",
-    ),
-    AudiSensorDescription(
-        icon="mdi:ev-station",
-        key="state_of_charge",
-        native_unit_of_measurement="%",
-        device_class=dc.POWER_FACTOR,
-        translation_key="state_of_charge",
-    ),
-    AudiSensorDescription(
-        icon="mdi:battery-charging",
-        key="remaining_charging_time",
-        value_fn=lambda x: "n/a"
-        if int(x) == 65535
-        else f"{divmod(x, 60)[0]:02d}:{divmod(x, 60)[1]:02d}",
-        native_unit_of_measurement="h",
-        device_class=dc.DURATION,
-        translation_key="remaining_charging_time",
-    ),
-    AudiSensorDescription(
-        icon="mdi:temperature-celsius",
-        key="outdoor_temperature",
-        native_unit_of_measurement="°C",
-        device_class=dc.TEMPERATURE,
-        value_fn=lambda x: round(float(x) / 10 - 273, 1),
-        translation_key="outdoor_temperature",
-    ),
-    AudiSensorDescription(
-        icon="mdi:car-door",
-        key="doors_trunk_status",
-        translation_key="doors_lock_status",
+        entity_registry_enabled_default=False,
     ),
     AudiSensorDescription(
         icon="mdi:car",
         key="overall_status",
+        value=("access", "access_status", "overall_status"),
         translation_key="overall_status",
-    ),
-    AudiSensorDescription(
-        key="trip_short_current",
-        translation_key="trip_short_current",
-        value_fn=lambda x: x.get("timestamp"),
-        native_unit_of_measurement="datetime",
-        device_class=dc.TIMESTAMP,
-    ),
-    AudiSensorDescription(
-        key="trip_short_reset",
-        translation_key="trip_short_reset",
-        value_fn=lambda x: x.get("timestamp"),
-        native_unit_of_measurement="datetime",
-        device_class=dc.TIMESTAMP,
-    ),
-    AudiSensorDescription(
-        key="trip_long_current",
-        translation_key="trip_long_current",
-        value_fn=lambda x: x.get("timestamp"),
-        native_unit_of_measurement="datetime",
-        device_class=dc.TIMESTAMP,
-    ),
-    AudiSensorDescription(
-        key="trip_long_reset",
-        translation_key="trip_long_reset",
-        value_fn=lambda x: x.get("timestamp"),
-        native_unit_of_measurement="datetime",
-        device_class=dc.TIMESTAMP,
     ),
 )
 
@@ -264,22 +261,11 @@ async def async_setup_entry(
 ) -> None:
     """Set up sensor."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
-
-    entities = []
-    for vin, vehicle in coordinator.data.items():
-        for name in vehicle.states:
-            for description in SENSOR_TYPES:
-                if description.key == name:
-                    if description.key in [
-                        "trip_short_current",
-                        "trip_long_current",
-                        "trip_short_reset",
-                        "trip_long_reset",
-                    ]:
-                        entities.append(AudiTripSensor(coordinator, vin, description))
-                    else:
-                        entities.append(AudiSensor(coordinator, vin, description))
-
+    entities = [
+        AudiSensor(coordinator, vehicle, description)
+        for description in SENSOR_TYPES
+        for vehicle in coordinator.data
+    ]
     async_add_entities(entities)
 
 
@@ -289,24 +275,4 @@ class AudiSensor(AudiEntity, SensorEntity):
     @property
     def state(self):
         """Return sensor state."""
-        value = self.coordinator.data[self.vin].states.get(self.uid)
-        if value and self.entity_description.value_fn:
-            return self.entity_description.value_fn(value)
-        return value
-
-
-class AudiTripSensor(AudiEntity, SensorEntity):
-    """Representation of a Audi sensor."""
-
-    @property
-    def state(self):
-        """Return sensor state."""
-        value = self.coordinator.data[self.vin].states.get(self.uid)
-        if value and self.entity_description.value_fn:
-            return self.entity_description.value_fn(value)
-        return value
-
-    @property
-    def extra_state_attributes(self):
-        """Return extra state attributes."""
-        return self.coordinator.data[self.vin].states.get(self.uid)
+        return self.getattr(self.entity_description.value)

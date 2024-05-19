@@ -1,4 +1,5 @@
 """Support for Audi Connect switches."""
+
 from __future__ import annotations
 
 import logging
@@ -18,25 +19,20 @@ _LOGGER = logging.getLogger(__name__)
 
 SENSOR_TYPES: tuple[AudiSwitchDescription, ...] = (
     AudiSwitchDescription(
-        icon="mdi:heating-coil",
-        key="preheater_state",
-        turn_mode="async_set_pre_heating",
-        value_fn=lambda x: x is not None,
-        translation_key="preheater_state",
-    ),
-    AudiSwitchDescription(
         icon="mdi:ev-station",
-        key="charging_state",
-        value_fn=lambda x: x != "off",
+        key="charging",
+        value=("charging", "charging_status", "charging_state"),
         turn_mode="async_set_battery_charger",
-        translation_key="charging_state",
+        translation_key="charging",
+        entity_registry_enabled_default=False,
     ),
     AudiSwitchDescription(
         icon="mdi:air-conditioner",
-        key="climatisation_state",
+        key="climatisation",
+        value=("climatisation", "climatisation_status", "climatisation_state"),
         turn_mode="async_set_climater",
-        value_fn=lambda x: x != "off",
-        translation_key="climatisation_state",
+        translation_key="climatisation",
+        entity_registry_enabled_default=False,
     ),
 )
 
@@ -47,12 +43,11 @@ async def async_setup_entry(
     """Set up the switch."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
 
-    entities = []
-    for vin, vehicle in coordinator.data.items():
-        for name in vehicle.states:
-            for description in SENSOR_TYPES:
-                if description.key == name:
-                    entities.append(AudiSwitch(coordinator, vin, description))
+    entities = [
+        AudiSwitch(coordinator, vehicle, description)
+        for description in SENSOR_TYPES
+        for vehicle in coordinator.data
+    ]
 
     async_add_entities(entities)
 
@@ -63,18 +58,12 @@ class AudiSwitch(AudiEntity, SwitchEntity):
     @property
     def is_on(self):
         """Return sensor state."""
-        value = self.coordinator.data[self.vin].states.get(self.uid)
-        if value and self.entity_description.value_fn:
-            return self.entity_description.value_fn(value)
-        return value
+        return self.getattr(self.entity_description.value)
 
     async def async_turn_on(self):
         """Turn the switch on."""
         try:
-            await getattr(
-                self.coordinator.api.vehicles.get(self.vin),
-                self.entity_description.turn_mode,
-            )(True)
+            await getattr(self.vehicle, self.entity_description.turn_mode)(True)
             await self.coordinator.async_request_refresh()
         except AudiException as error:
             _LOGGER.error("Error to turn on : %s", error)
@@ -82,10 +71,7 @@ class AudiSwitch(AudiEntity, SwitchEntity):
     async def async_turn_off(self):
         """Turn the switch off."""
         try:
-            await getattr(
-                self.coordinator.api.vehicles.get(self.vin),
-                self.entity_description.turn_mode,
-            )(False)
+            await getattr(self.vehicle, self.entity_description.turn_mode)(False)
             await self.coordinator.async_request_refresh()
         except AudiException as error:
             _LOGGER.error("Error to turn off : %s", error)

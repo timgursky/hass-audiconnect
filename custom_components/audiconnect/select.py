@@ -1,4 +1,5 @@
 """Support for Audi Connect switches."""
+
 from __future__ import annotations
 
 import logging
@@ -32,14 +33,11 @@ async def async_setup_entry(
 ) -> None:
     """Set up the switch."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
-
-    entities = []
-    for vin, vehicle in coordinator.data.items():
-        for name in vehicle.states:
-            for description in SENSOR_TYPES:
-                if description.key == name:
-                    entities.append(AudiSelect(coordinator, vin, description))
-
+    entities = [
+        AudiSelect(coordinator, vehicle, description)
+        for description in SENSOR_TYPES
+        for vehicle in coordinator.data
+    ]
     async_add_entities(entities)
 
 
@@ -49,16 +47,13 @@ class AudiSelect(AudiEntity, SelectEntity):
     @property
     def current_option(self):
         """Return sensor state."""
-        value = self.coordinator.data[self.vin].states.get(self.uid)
-        if value and self.entity_description.value_fn:
-            return self.entity_description.value_fn(value)
-        return value
+        return self.getattr(self.entity_description.value)
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
         try:
             await getattr(
-                self.coordinator.api.vehicles.get(self.vin),
+                self.vehicle,
                 self.entity_description.turn_mode,
             )(True, option)
             await self.coordinator.async_request_refresh()

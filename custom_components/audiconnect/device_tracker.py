@@ -1,4 +1,5 @@
 """Support for tracking an Audi."""
+
 from __future__ import annotations
 
 import logging
@@ -25,14 +26,11 @@ async def async_setup_entry(
 ) -> None:
     """Set up device tracker."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
-
-    entities = []
-    for vin, vehicle in coordinator.data.items():
-        for name in vehicle.states:
-            for description in SENSOR_TYPES:
-                if description.key == name:
-                    entities.append(AudiDeviceTracker(coordinator, vin, description))
-
+    entities = [
+        AudiDeviceTracker(coordinator, vehicle, description)
+        for description in SENSOR_TYPES
+        for vehicle in coordinator.data
+    ]
     async_add_entities(entities)
 
 
@@ -42,12 +40,12 @@ class AudiDeviceTracker(AudiEntity, TrackerEntity):
     @property
     def latitude(self):
         """Return latitude value of the device."""
-        return self.coordinator.data[self.vin].states[self.uid]["latitude"]
+        return self.vehicle.position.latitude
 
     @property
     def longitude(self):
         """Return longitude value of the device."""
-        return self.coordinator.data[self.vin].states[self.uid]["longitude"]
+        return self.vehicle.position.longitude
 
     @property
     def source_type(self):
@@ -57,5 +55,4 @@ class AudiDeviceTracker(AudiEntity, TrackerEntity):
     @property
     def extra_state_attributes(self):
         """Return extra attributes."""
-        attr = self.coordinator.data[self.vin].states[self.uid]
-        return {"parktime": attr["parktime"]}
+        return {"parktime": self.vehicle.position.last_access}
