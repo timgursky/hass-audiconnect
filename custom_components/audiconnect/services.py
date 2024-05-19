@@ -1,9 +1,11 @@
 """Helper module."""
+
 from __future__ import annotations
 
 import logging
 
 from audiconnectpy import AudiException
+from audiconnectpy.vehicle import Vehicle
 import voluptuous as vol
 
 from homeassistant.core import HomeAssistant, ServiceCall
@@ -33,11 +35,17 @@ async def async_setup_services(
 ):
     """Register services."""
 
+    def search_vehicle(vin: str) -> Vehicle:
+        """Return vehicle object."""
+        for vehicle in coordinator.api.vehicles:
+            if vehicle.vin == vin:
+                return vehicle
+
     async def async_refresh_data(call: ServiceCall) -> None:
         device_id = call.data.get(CONF_VIN).lower()
         device = dr.async_get(hass).async_get(device_id)
         vin = dict(device.identifiers).get(DOMAIN)
-        vehicle = coordinator.api.vehicles.get(vin)
+        vehicle = search_vehicle(vin)
         await vehicle.async_refresh_vehicle_data()
         await coordinator.async_request_refresh()
 
@@ -59,7 +67,7 @@ async def async_setup_services(
 
     async def async_actions(vin: str, action: str, mode: bool):
         """Execute action."""
-        vehicle = coordinator.api.vehicles.get(vin)
+        vehicle = search_vehicle(vin)
         try:
             match action:
                 case "lock":
