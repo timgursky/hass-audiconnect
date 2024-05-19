@@ -1,10 +1,12 @@
 """Audi connecgt coordinator."""
+
 from __future__ import annotations
 
 from datetime import timedelta
 import logging
 
 from audiconnectpy import AudiConnect, AudiException
+from audiconnectpy.vehicle import Vehicle
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_PIN, CONF_USERNAME
@@ -47,25 +49,24 @@ class AudiDataUpdateCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self) -> dict:
         """Update data."""
         try:
-            await self.api.async_update()
-            if not self.api.is_connected:
-                raise UpdateFailed("Unable to connect")
-            self._set_api_level()
+            await self.api.async_login()
         except AudiException as error:
             raise UpdateFailed(error) from error
-        else:
-            return {
-                vin: vehicle
-                for vin, vehicle in self.api.vehicles.items()
-                if vehicle.support_vehicle is True
-            }
 
-    def _set_api_level(self) -> None:
+        if self.api.is_connected:
+            try:
+                for vehicle in self.api.vehicles:
+                    self._set_api_level(vehicle)
+                    await vehicle.async_update()
+            except AudiException as error:
+                raise UpdateFailed(error) from error
+            else:
+                return self.api.vehicles
+        else:
+            raise UpdateFailed("Unable to connect")
+
+    def _set_api_level(self, ojb: Vehicle) -> None:
         """Set API Level."""
-        if isinstance(self.api.vehicles, dict):
-            for vin, Vehicle in self.api.vehicles.items():
-                if api_levels := self.options.get(vin):
-                    for name, level in api_levels.items():
-                        Vehicle.set_api_level(
-                            name.replace("api_level_", ""), int(level)
-                        )
+        if api_levels := self.options.get(ojb.vin):
+            for name, level in api_levels.items():
+                ojb.set_api_level(name.replace("api_level_", ""), int(level))
