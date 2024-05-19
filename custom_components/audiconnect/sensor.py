@@ -6,6 +6,7 @@ import logging
 
 from homeassistant.components.sensor import SensorDeviceClass as dc, SensorEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -134,6 +135,7 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         native_unit_of_measurement="K",
         translation_key="battery_temperature_max",
         entity_registry_enabled_default=False,
+        entity_category=EntityCategory.DIAGNOSTIC,
     ),
     AudiSensorDescription(
         icon="mdi:engine",
@@ -147,6 +149,7 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         native_unit_of_measurement="K",
         translation_key="battery_temperature_min",
         entity_registry_enabled_default=False,
+        entity_category=EntityCategory.DIAGNOSTIC,
     ),
     AudiSensorDescription(
         icon="mdi:ev-station",
@@ -211,10 +214,11 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
     ),
     AudiSensorDescription(
         icon="mdi:led-on",
-        key="led_color",
+        key="plu_led_color",
         value=("charging", "plug_status", "led_color"),
-        translation_key="led_color",
+        translation_key="plu_led_color",
         entity_registry_enabled_default=False,
+        entity_category=EntityCategory.DIAGNOSTIC,
     ),
     AudiSensorDescription(
         icon="mdi:av-timer",
@@ -247,12 +251,6 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         translation_key="secondary_engine_range",
         entity_registry_enabled_default=False,
     ),
-    AudiSensorDescription(
-        icon="mdi:car",
-        key="overall_status",
-        value=("access", "access_status", "overall_status"),
-        translation_key="overall_status",
-    ),
 )
 
 
@@ -275,4 +273,7 @@ class AudiSensor(AudiEntity, SensorEntity):
     @property
     def state(self):
         """Return sensor state."""
-        return self.getattr(self.entity_description.value)
+        value = self.getattr(self.entity_description.value)
+        if value and self.entity_description.value_fn:
+            return self.entity_description.value_fn(value)
+        return value

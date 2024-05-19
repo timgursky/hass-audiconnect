@@ -9,6 +9,7 @@ from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
 )
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -24,8 +25,10 @@ SENSOR_TYPES: tuple[AudiBinarySensorDescription, ...] = (
         icon="mdi:oil",
         key="oil_level",
         value=("oil_level", "oil_level_status", "value"),
+        value_fn=lambda x: x is False,
         device_class=dc.PROBLEM,
         translation_key="oil_level",
+        entity_category=EntityCategory.DIAGNOSTIC,
     ),
     AudiBinarySensorDescription(
         icon="mdi:car-light-alert",
@@ -219,6 +222,14 @@ SENSOR_TYPES: tuple[AudiBinarySensorDescription, ...] = (
         translation_key="plug_lock_state",
         entity_registry_enabled_default=False,
     ),
+    AudiBinarySensorDescription(
+        icon="mdi:car",
+        key="overall_status",
+        device_class=dc.SAFETY,
+        value=("access", "access_status", "overall_status"),
+        value_fn=lambda x: x != "safe",
+        translation_key="overall_status",
+    ),
 )
 
 
@@ -241,4 +252,7 @@ class AudiBinarySensor(AudiEntity, BinarySensorEntity):
     @property
     def is_on(self):
         """Return is on."""
-        return self.getattr(self.entity_description.value)
+        value = self.getattr(self.entity_description.value)
+        if value and self.entity_description.value_fn:
+            return self.entity_description.value_fn(value)
+        return value

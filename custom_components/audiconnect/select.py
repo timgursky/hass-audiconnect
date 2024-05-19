@@ -47,7 +47,10 @@ class AudiSelect(AudiEntity, SelectEntity):
     @property
     def current_option(self):
         """Return sensor state."""
-        return self.getattr(self.entity_description.value)
+        value = self.getattr(self.entity_description.value)
+        if value and self.entity_description.value_fn:
+            return self.entity_description.value_fn(value)
+        return value
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""

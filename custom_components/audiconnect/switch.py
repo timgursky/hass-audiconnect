@@ -58,7 +58,10 @@ class AudiSwitch(AudiEntity, SwitchEntity):
     @property
     def is_on(self):
         """Return sensor state."""
-        return self.getattr(self.entity_description.value)
+        value = self.getattr(self.entity_description.value)
+        if value and self.entity_description.value_fn:
+            return self.entity_description.value_fn(value)
+        return value
 
     async def async_turn_on(self):
         """Turn the switch on."""

@@ -69,7 +69,10 @@ class AudiNumber(AudiEntity, NumberEntity):
     @property
     def native_value(self) -> float:
         """Native value."""
-        return self.getattr(self.entity_description.value)
+        value = self.getattr(self.entity_description.value)
+        if value and self.entity_description.value_fn:
+            return self.entity_description.value_fn(value)
+        return value
 
     async def async_set_native_value(self, value: float) -> None:
         """Set the text value."""

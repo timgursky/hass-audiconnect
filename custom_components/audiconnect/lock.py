@@ -48,7 +48,10 @@ class AudiLock(AudiEntity, LockEntity):
     @property
     def is_locked(self):
         """Return lock status."""
-        return self.getattr(self.entity_description.value)
+        value = self.getattr(self.entity_description.value)
+        if value and self.entity_description.value_fn:
+            return self.entity_description.value_fn(value)
+        return value
 
     async def async_lock(self):
         """Lock the car."""
