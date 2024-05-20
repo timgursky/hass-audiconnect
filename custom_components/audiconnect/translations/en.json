@@ -8,6 +8,7 @@
           "username": "Email",
           "password": "Password",
           "country": "country code",
+          "model": "model",
           "pin": "Pin code"
         }
       }

@@ -11,6 +11,9 @@ CONF_COUNTRY = "region"
 CONF_VIN = "vin"
 CONF_ACTION = "action"
 CONF_VEHICLE = "vehicle"
+CONF_MODEL = "model"
+CONF_LIST_MODEL = ["standard", "e-tron"]
+DEFAULT_MODEL = "standard"
 COUNTRY_CODE = {
     "AL": "Albania",
     "AM": "Armenia",

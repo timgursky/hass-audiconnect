@@ -16,6 +16,7 @@
           "username": "Email",
           "password": "Mot de passe",
           "country": "Code pays",
+          "model": "Modèle",
           "pin": "Code Pin"
         }
       }

@@ -17,6 +17,7 @@
           "password": "Senha",
           "username": "Nome de usuário",
           "pin": "S-PIN",
+          "model": "Modelo",
           "region": "Região"
         },
         "title": "Informações da conta Audi Connect "

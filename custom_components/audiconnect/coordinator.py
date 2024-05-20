@@ -15,7 +15,14 @@ from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util.unit_system import US_CUSTOMARY_SYSTEM
 
-from .const import CONF_COUNTRY, CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, DOMAIN
+from .const import (
+    CONF_COUNTRY,
+    CONF_MODEL,
+    CONF_SCAN_INTERVAL,
+    DEFAULT_MODEL,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,7 +42,8 @@ class AudiDataUpdateCoordinator(DataUpdateCoordinator):
             entry.data[CONF_PASSWORD],
             entry.data[CONF_COUNTRY],
             entry.data.get(CONF_PIN),
-            unit_system,
+            model=entry.data.get(CONF_MODEL, DEFAULT_MODEL),
+            unit_system=unit_system,
         )
         super().__init__(
             hass,

@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from audiconnectpy import AudiConnect, AudiException, AuthorizationError
+from audiconnectpy import MODELS, AudiConnect, AudiException, AuthorizationError
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -22,9 +22,11 @@ from .const import (
     API_LEVEL_VENTILATION,
     API_LEVEL_WINDOWSHEATING,
     CONF_COUNTRY,
+    CONF_MODEL,
     CONF_SCAN_INTERVAL,
     CONF_VEHICLE,
     COUNTRY_CODE,
+    DEFAULT_MODEL,
     DOMAIN,
     MENU_OTHER,
     MENU_SAVE,
@@ -39,6 +41,7 @@ DATA_SCHEMA = vol.Schema(
         vol.Required(CONF_PASSWORD): str,
         vol.Required(CONF_COUNTRY, default="DE"): vol.In(COUNTRY_CODE),
         vol.Optional(CONF_PIN): str,
+        vol.Optional(CONF_MODEL, default=DEFAULT_MODEL): vol.In(MODELS),
     }
 )
 
@@ -73,6 +76,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     user_input[CONF_PASSWORD],
                     user_input[CONF_COUNTRY],
                     user_input.get(CONF_PIN),
+                    model=user_input[CONF_MODEL],
                 )
                 await api.async_login()
                 if not api.is_connected:
