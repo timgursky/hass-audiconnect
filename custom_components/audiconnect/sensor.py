@@ -19,10 +19,19 @@ _LOGGER = logging.getLogger(__name__)
 
 SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
     AudiSensorDescription(
+        key="last_refresh",
+        name="Last refresh",
+        icon="mdi:clock",
+        value="last_access",
+        native_unit_of_measurement="datetime",
+        device_class=dc.TIMESTAMP,
+        translation_key="last_refresh",
+    ),
+    AudiSensorDescription(
         key="last_update_time",
         name="Last update",
         icon="mdi:clock",
-        value="last_access",
+        value="last_update",
         native_unit_of_measurement="datetime",
         device_class=dc.TIMESTAMP,
         translation_key="last_update_time",
