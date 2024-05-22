@@ -10,6 +10,8 @@ from homeassistant.helpers import device_registry as dr
 from .coordinator import AudiDataUpdateCoordinator
 from .services import async_setup_services
 
+type AudiConfigEntry = ConfigEntry[AudiDataUpdateCoordinator]
+
 PLATFORMS: list[Platform] = [
     Platform.SENSOR,
     Platform.BINARY_SENSOR,
@@ -19,8 +21,6 @@ PLATFORMS: list[Platform] = [
     # Platform.SELECT,
     Platform.NUMBER,
 ]
-
-type AudiConfigEntry = ConfigEntry[AudiDataUpdateCoordinator]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: AudiConfigEntry) -> bool:
@@ -36,18 +36,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: AudiConfigEntry) -> bool
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: AudiConfigEntry) -> bool:
     """Unload a config entry."""
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
-async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry):
+async def _async_update_listener(hass: HomeAssistant, entry: AudiConfigEntry):
     """Reload device tracker if change option."""
     await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_remove_config_entry_device(
-    hass: HomeAssistant, config_entry: ConfigEntry, device_entry: dr.DeviceEntry
+    hass: HomeAssistant, entry: AudiConfigEntry, device_entry: dr.DeviceEntry
 ) -> bool:
     """Remove config entry from a device."""
     return True
