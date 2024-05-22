@@ -1,4 +1,5 @@
 """The Audi connect integration."""
+
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
@@ -6,7 +7,6 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 
-from .const import DOMAIN
 from .coordinator import AudiDataUpdateCoordinator
 from .services import async_setup_services
 
@@ -20,19 +20,17 @@ PLATFORMS: list[Platform] = [
     Platform.NUMBER,
 ]
 
+type AudiConfigEntry = ConfigEntry[AudiDataUpdateCoordinator]
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+
+async def async_setup_entry(hass: HomeAssistant, entry: AudiConfigEntry) -> bool:
     """Set up Audi connect from a config entry."""
-    hass.data.setdefault(DOMAIN, {})
-
     coordinator = AudiDataUpdateCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()
+    entry.runtime_data = coordinator
 
-    hass.data[DOMAIN][entry.entry_id] = coordinator
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-
     await async_setup_services(hass, coordinator)
-
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
 
     return True
@@ -40,10 +38,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
-        hass.data[DOMAIN].pop(entry.entry_id)
-
-    return unload_ok
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
 async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry):
@@ -52,9 +47,7 @@ async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry):
 
 
 async def async_remove_config_entry_device(
-    hass: HomeAssistant,  # pylint: disable=unused-argument
-    config_entry: ConfigEntry,  # pylint: disable=unused-argument
-    device_entry: dr.DeviceEntry,  # pylint: disable=unused-argument
+    hass: HomeAssistant, config_entry: ConfigEntry, device_entry: dr.DeviceEntry
 ) -> bool:
     """Remove config entry from a device."""
     return True

@@ -7,11 +7,10 @@ import logging
 from audiconnectpy import AudiException
 
 from homeassistant.components.switch import SwitchEntity
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from . import AudiConfigEntry
 from .entity import AudiEntity
 from .helpers import AudiSwitchDescription
 
@@ -40,10 +39,10 @@ SENSOR_TYPES: tuple[AudiSwitchDescription, ...] = (
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant, entry: AudiConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up the switch."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
 
     entities = [
         AudiSwitch(coordinator, vehicle, description)

@@ -6,11 +6,10 @@ import logging
 
 from homeassistant.components.device_tracker import SourceType
 from homeassistant.components.device_tracker.config_entry import TrackerEntity
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from . import AudiConfigEntry
 from .entity import AudiEntity
 from .helpers import AudiTrackerDescription
 
@@ -22,10 +21,10 @@ SENSOR_TYPES: tuple[AudiTrackerDescription, ...] = (
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant, entry: AudiConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up device tracker."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     entities = [
         AudiDeviceTracker(coordinator, vehicle, description)
         for description in SENSOR_TYPES

@@ -8,11 +8,10 @@ from audiconnectpy import AudiException
 
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass as dc
 from homeassistant.components.lock import LockEntity
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from . import AudiConfigEntry
 from .entity import AudiEntity
 from .helpers import AudiLockDescription
 
@@ -31,10 +30,10 @@ SENSOR_TYPES: tuple[AudiLockDescription, ...] = (
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant, entry: AudiConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up lock."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     entities = [
         AudiLock(coordinator, vehicle, description)
         for description in SENSOR_TYPES
