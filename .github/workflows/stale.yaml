@@ -3,13 +3,16 @@ name: Stale
 # yamllint disable-line rule:truthy
 on:
   schedule:
-    - cron: 0 * * * *
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 jobs:
   stale:
     if: github.repository_owner == 'cyr-ius'
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write    
     steps:
       # The 60 day stale policy for PRs
       # Used for:
@@ -19,7 +22,6 @@ jobs:
       - name: 60 days stale PRs policy
         uses: actions/stale@v9.0.0
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
           days-before-stale: 60
           days-before-close: 7
           days-before-issue-stale: -1
@@ -39,18 +41,6 @@ jobs:
 
             Thank you for your contribution!
 
-      # Generate a token for the GitHub App, we use this method to avoid
-      # hitting API limits for our GitHub actions + have a higher rate limit.
-      # This is only used for issues.
-      - name: Generate app token
-        id: token
-        # Pinned to a specific version of the action for security reasons
-        # v1.7.0
-        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a
-        with:
-          app_id: ${{ secrets.ISSUE_TRIAGE_APP_ID }}
-          private_key: ${{ secrets.ISSUE_TRIAGE_APP_PEM }}
-
       # The 90 day stale policy for issues
       # Used for:
       # - Issues
@@ -59,7 +49,6 @@ jobs:
       - name: 90 days stale issues
         uses: actions/stale@v9.0.0
         with:
-          repo-token: ${{ steps.token.outputs.token }}
           days-before-stale: 90
           days-before-close: 7
           days-before-pr-stale: -1
@@ -89,7 +78,6 @@ jobs:
       - name: Needs more information stale issues policy
         uses: actions/stale@v9.0.0
         with:
-          repo-token: ${{ steps.token.outputs.token }}
           only-labels: "needs-more-information"
           days-before-stale: 14
           days-before-close: 7
