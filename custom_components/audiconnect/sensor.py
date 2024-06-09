@@ -163,6 +163,7 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         icon="mdi:ev-station",
         value="charging.battery_status.current_soc_pct",
         device_class=dc.BATTERY,
+        native_unit_of_measurement="%",
         translation_key="battery_level",
         entity_registry_enabled_default=False,
     ),
