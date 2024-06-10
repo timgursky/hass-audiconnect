@@ -47,10 +47,11 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
     ),
     AudiSensorDescription(
         key="climatisation_state",
-        name="Climatisation: state",
-        icon="mdi:climate",
+        name="Climatisation state",
+        icon="mdi:air-filter",
         value="climatisation.climatisation_status.climatisation_state",
         translation_key="climatisation_state",
+        entity_registry_enabled_default=False,
     ),
     AudiSensorDescription(
         key="remaining_climatisation",
