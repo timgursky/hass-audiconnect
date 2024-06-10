@@ -240,6 +240,15 @@ SENSOR_TYPES: tuple[AudiBinarySensorDescription, ...] = (
         entity_registry_enabled_default=False,
     ),
     AudiBinarySensorDescription(
+        key="plug_connection_state",
+        icon="mdi:power-plug",
+        name="Plug: connection",
+        value="charging.plug_status.plug_connection_state",
+        device_class=dc.LOCK,
+        translation_key="plug_connection_state",
+        entity_registry_enabled_default=False,
+    ),
+    AudiBinarySensorDescription(
         key="plug_lock_state",
         icon="mdi:power-plug",
         name="Plug: lock",
