@@ -253,6 +253,7 @@ SENSOR_TYPES: tuple[AudiBinarySensorDescription, ...] = (
         icon="mdi:power-plug",
         name="Plug: lock",
         value="charging.plug_status.plug_lock_state",
+        value_fn=lambda x: x is False,
         device_class=dc.LOCK,
         translation_key="plug_lock_state",
         entity_registry_enabled_default=False,
