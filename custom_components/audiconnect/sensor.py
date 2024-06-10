@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from homeassistant.components.sensor import SensorDeviceClass as dc
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorDeviceClass as dc, SensorEntity
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
