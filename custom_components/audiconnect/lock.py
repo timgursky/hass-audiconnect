@@ -49,7 +49,7 @@ class AudiLock(AudiEntity, LockEntity):
     def is_locked(self):
         """Return lock status."""
         value = self.getattr(self.entity_description.value)
-        if value and self.entity_description.value_fn:
+        if value is not None and self.entity_description.value_fn:
             return self.entity_description.value_fn(value)
         return value
 

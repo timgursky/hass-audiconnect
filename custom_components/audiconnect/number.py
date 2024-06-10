@@ -71,7 +71,7 @@ class AudiNumber(AudiEntity, NumberEntity):
     def native_value(self) -> float:
         """Native value."""
         value = self.getattr(self.entity_description.value)
-        if value and self.entity_description.value_fn:
+        if value is not None and self.entity_description.value_fn:
             return self.entity_description.value_fn(value)
         return value
 
