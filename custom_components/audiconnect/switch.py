@@ -31,6 +31,7 @@ SENSOR_TYPES: tuple[AudiSwitchDescription, ...] = (
         key="climatisation",
         name="Climatisation",
         value="climatisation.climatisation_status.climatisation_state",
+        value_fn=lambda x: x != "off",
         turn_mode="async_set_climater",
         translation_key="climatisation",
         entity_registry_enabled_default=False,
@@ -60,7 +61,7 @@ class AudiSwitch(AudiEntity, SwitchEntity):
     def is_on(self):
         """Return sensor state."""
         value = self.getattr(self.entity_description.value)
-        if value and self.entity_description.value_fn:
+        if value is not None and self.entity_description.value_fn:
             return self.entity_description.value_fn(value)
         return value
 
