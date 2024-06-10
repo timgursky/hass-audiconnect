@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import logging
 
-from homeassistant.components.sensor import SensorDeviceClass as dc, SensorEntity
+from homeassistant.components.sensor import SensorDeviceClass as dc
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -43,6 +44,23 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         value="climatisation.climatisation_settings.target_temperature_c",
         device_class=dc.TEMPERATURE,
         translation_key="climatisation_target_temperature",
+    ),
+    AudiSensorDescription(
+        key="climatisation_state",
+        name="Climatisation: state",
+        icon="mdi:climate",
+        value="climatisation.climatisation_status.climatisation_state",
+        translation_key="climatisation_state",
+    ),
+    AudiSensorDescription(
+        key="remaining_climatisation",
+        name="Climatisation: timer",
+        icon="mdi:av-timer",
+        value="climatisation.climatisation_status.remaining_climatisation_time_min",
+        native_unit_of_measurement="min",
+        device_class=dc.DURATION,
+        translation_key="remaining_climatisation",
+        entity_registry_enabled_default=False,
     ),
     AudiSensorDescription(
         key="maintenance_inspection_to_oil_change",
@@ -234,16 +252,6 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         translation_key="plug_led_color",
         entity_registry_enabled_default=False,
         entity_category=EntityCategory.DIAGNOSTIC,
-    ),
-    AudiSensorDescription(
-        key="remaining_climatisation",
-        name="Climatisation: timer",
-        icon="mdi:av-timer",
-        value="climatisation.climatisation_status.remaining_climatisation_time_min",
-        native_unit_of_measurement="min",
-        device_class=dc.DURATION,
-        translation_key="remaining_climatisation",
-        entity_registry_enabled_default=False,
     ),
     AudiSensorDescription(
         key="primary_engine_range",
