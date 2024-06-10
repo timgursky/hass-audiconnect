@@ -288,6 +288,6 @@ class AudiSensor(AudiEntity, SensorEntity):
     def state(self):
         """Return sensor state."""
         value = self.getattr(self.entity_description.value)
-        if value and self.entity_description.value_fn:
+        if value is not None and self.entity_description.value_fn:
             return self.entity_description.value_fn(value)
         return value

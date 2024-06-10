@@ -290,6 +290,6 @@ class AudiBinarySensor(AudiEntity, BinarySensorEntity):
     def is_on(self):
         """Return is on."""
         value = self.getattr(self.entity_description.value)
-        if value and self.entity_description.value_fn:
+        if value is not None and self.entity_description.value_fn:
             return self.entity_description.value_fn(value)
         return value
