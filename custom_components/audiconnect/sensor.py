@@ -229,8 +229,6 @@ SENSOR_TYPES: tuple[AudiSensorDescription, ...] = (
         name="Charge type",
         icon="mdi:car-info",
         value="charging.charging_status.charge_type",
-        native_unit_of_measurement="min",
-        device_class=dc.DURATION,
         translation_key="charge_type",
         entity_registry_enabled_default=False,
     ),
