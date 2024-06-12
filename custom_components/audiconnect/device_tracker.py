@@ -16,7 +16,7 @@ from .helpers import AudiTrackerDescription
 _LOGGER = logging.getLogger(__name__)
 
 SENSOR_TYPES: tuple[AudiTrackerDescription, ...] = (
-    AudiTrackerDescription(key="position", translation_key="position"),
+    AudiTrackerDescription(key="position", name="Position", translation_key="position"),
 )
 
 
