@@ -267,6 +267,14 @@ SENSOR_TYPES: tuple[AudiBinarySensorDescription, ...] = (
         value_fn=lambda x: x != "safe",
         translation_key="overall_status",
     ),
+    AudiBinarySensorDescription(
+        key="is_moving",
+        icon="mdi:motion",
+        name="Is moving",
+        value="is_moving",
+        translation_key="is_moving",
+        entity_registry_enabled_default=False,
+    ),
 )
 
 
