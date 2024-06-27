@@ -2,12 +2,12 @@
   "domain": "audiconnect",
   "name": "Audi Connect",
   "after_dependencies": ["lock"],
-  "codeowners": ["@cyr-ius"],
+  "codeowners": ["@timgursky"],
   "config_flow": true,
-  "documentation": "https://github.com/cyr-ius/hass-audiconnect",
+  "documentation": "https://github.com/timgursky/hass-audiconnect",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/cyr-ius/hass-audiconnect/issues",
+  "issue_tracker": "https://github.com/timgursky/hass-audiconnect/issues",
   "loggers": ["audiconnectpy"],
   "requirements": ["audiconnectpy @ git+https://github.com/timgursky/audiconnectpy.git"],
-  "version": "2.1.3"
+  "version": "2.1.4"
 }
