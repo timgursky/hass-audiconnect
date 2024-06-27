@@ -39,7 +39,7 @@ DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_USERNAME): str,
         vol.Required(CONF_PASSWORD): str,
-        vol.Required(CONF_COUNTRY, default="DE"): vol.In(COUNTRY_CODE),
+        vol.Required(CONF_COUNTRY, default="US"): vol.In(COUNTRY_CODE),
         vol.Optional(CONF_PIN): str,
         vol.Optional(CONF_MODEL, default=DEFAULT_MODEL): vol.In(MODELS),
     }

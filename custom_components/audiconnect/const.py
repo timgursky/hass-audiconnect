@@ -21,7 +21,7 @@ COUNTRY_CODE = {
     "AT": "Austria",
     "AZ": "Azerbaijan",
     "BE": "Belgium",
-    "US": "United States",
+    "BA": "Bosnia and Herzegovina",
     "BG": "Bulgaria",
     "CA": "Canada",
     "IC": "Canary Islands",
@@ -62,15 +62,16 @@ COUNTRY_CODE = {
     "SG": "Singapore",
     "SK": "Slovakia",
     "SI": "Slovenia",
+    "ZA": "South Africa",
     "ES": "Spain",
     "SE": "Sweden",
     "CH": "Switzerland",
     "TW": "Taiwan",
     "UA": "Ukraine",
     "GB": "United Kingdom",
-    "ZA": "South Africa",
-    "BA": "Bosnia and Herzegovina",
+    "US": "United States"
 }
+
 CONF_SCAN_INTERVAL = "scan_interval"
 DEFAULT_SCAN_INTERVAL = 30
 MANUFACTURER = "Audi"
